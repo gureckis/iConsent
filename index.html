@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>iConsent by gureckis</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>iConsent</h1>
+        <p>A system for psychologists designed to manage and collect informed consent using iPads</p>
+
+        <p class="view"><a href="https://github.com/gureckis/iConsent">View the Project on GitHub <small>gureckis/iConsent</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/gureckis/iConsent/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/gureckis/iConsent/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/gureckis/iConsent">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>iConsent</h1>
+
+<h2><em>What is it?</em></h2>
+
+<p>A system for psychologists designed to manage and collect informed consent using iPads.  Ditch the file 
+cabinets full of papers!  Join the future!  It's easy!</p>
+
+<h2><em>What does it do?</em></h2>
+
+<p>The software provides an iOS application that runs on iPads that communicates with a server processes
+running on a computer of your choice.  The application presents informed consent forms to a participant,
+allows them to sign using their finger, collects demographic information, and sends the results (including
+an image of the signature) up to the server for centralized logging.  In addition, the system can 
+coordinate subject identification numbers and counterbalance experimental conditions across multiple 
+testing sites.</p>
+
+<h2><em>What does it NOT do?</em></h2>
+
+<p>While the code might be the starting point for designing iPad based experiments, it is meant to
+be a stand-alone app simply for coordinating the informed consent component of any experiment
+(computer-based or not).  Thus, it is ideal for things like developmental studies or field work
+where you might not use a computer for the actual experiment, but might still want computerized
+records of the informed consent.  The code can easily be merged into other iPad-based experiments
+to provide a seamless and professional workflow.</p>
+
+<h2><em>How does it work?</em></h2>
+
+<p>The software setup is pretty simple:</p>
+
+<ol>
+<li>You clone a copy of the project from Github.</li>
+<li>You customize a few of the configuration files for your particular set up.<br>
+</li>
+<li>You use the <a href="https://developer.apple.com/devcenter/ios/index.action">iOS developer tools</a> (XCode) to compile the application and install it on your iPad using USB.<br>
+</li>
+<li>You install MySQL someplace (optional).</li>
+<li>You launch the server code and leave it running in the background on a computer with a constant Internet connection. </li>
+<li>You take the iPad out into the world and do awesome science!</li>
+</ol><h2><em>Dependencies</em></h2>
+
+<p>You will need a relatively recent version of Python with the following modules installed</p>
+
+<ul>
+<li>
+<a href="http://flask.pocoo.org/">Flask</a> - A lightweight web framework</li>
+<li>
+<a href="http://www.sqlalchemy.org/">SQLAlchemy</a> - A powerful SQL abstraction layer</li>
+</ul><p>You can install these items with the following commands:</p>
+
+<pre><code>easy_install Flask-SQLAlchemy
+easy_install Flask
+</code></pre>
+
+<p>To serve the experiment you will need to run the code from a web server connected to the Internet.
+A further (optional) dependency is an installation of MySQL running on a Internet accessible 
+computer.</p>
+
+<p>In addition you will need the most recent copy of Apple's XCode software and an <a href="https://developer.apple.com/devcenter/ios/index.action">iOS developer</a>
+account (to compile and install the app).</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/gureckis">gureckis</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
