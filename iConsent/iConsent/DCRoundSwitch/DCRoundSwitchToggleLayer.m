@@ -19,11 +19,11 @@
 
 - (void)dealloc
 {
-	[onString release];
-	[offString release];
-	[onTintColor release];
+//	[onString release];
+//	[offString release];
+//	[onTintColor release];
 
-	[super dealloc];
+//	[super dealloc];
 }
 
 - (id)initWithOnString:(NSString *)anOnString offString:(NSString *)anOffString onTintColor:(UIColor *)anOnTintColor
