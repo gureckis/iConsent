@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "IC_Model.h"
 
-@class IC_ViewController;
+@class IC_FormViewController;
 
 @interface IC_AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) IC_ViewController *viewController;
+@property (strong, nonatomic) IC_FormViewController *viewController;
 @property (strong, nonatomic) IC_Model *model;
 @end

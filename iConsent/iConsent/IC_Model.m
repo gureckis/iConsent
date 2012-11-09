@@ -16,23 +16,24 @@
 
 @interface IC_Model()
 @property (nonatomic, strong) NSMutableData *responseData;
-
-
 @property (nonatomic, strong) NSString *deviceID; // mac address
 @property (nonatomic, strong) NSString *processID; // processID
 
 - (NSString *)determineMacAddress;
 - (NSString *)generateProcessIDWithLength:(int)len;
 - (NSString *)generateRandomStringWithLength:(int)len;
+- (void)getExperiments;
+- (void)getLocations;
 @end
 
 @implementation IC_Model
+@synthesize experiments = _experiments;
+@synthesize locations = _locations;
 @synthesize deviceID = _deviceID;
 @synthesize processID = _processID;
 @synthesize responseData = _responseData;
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)init {
     self = [super init];
     if (self) {
         // Initialization code
@@ -42,6 +43,9 @@
         self.responseData = [NSMutableData data];
         NSLog(@"device id = %@", self.deviceID);
         NSLog(@"process id = %@", self.processID);
+        
+        [self getExperiments];
+        [self getLocations];
     }
     return self;
 }
@@ -54,8 +58,23 @@
     return [[NSString alloc] initWithFormat:@"%@/consent", @SERVERNAME];
 }
 
+- (void)getExperiments {
+    self.experiments = [NSArray arrayWithObjects:
+                            @"Entomologist",
+                            @"Tree Search",
+                            @"Causal Learning",
+                        nil];
+}
 
-
+- (void)getLocations {
+    self.locations = [NSArray arrayWithObjects:
+                        @"AMNH",
+                        @"CMOM",
+                        @"NYU - Gureckislab",
+                        @"NYU - Rhodeslab",
+                        nil];
+    
+}
 
 - (NSString *)generateProcessIDWithLength: (int)len
 {

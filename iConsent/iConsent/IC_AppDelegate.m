@@ -8,7 +8,7 @@
 
 #import "IC_AppDelegate.h"
 
-#import "IC_ViewController.h"
+#import "IC_FormViewController.h"
 
 @implementation IC_AppDelegate
 @synthesize model = _model;
@@ -18,7 +18,7 @@
     self.model = [[IC_Model alloc] init];
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    self.viewController = [[IC_ViewController alloc] initWithNibName:@"IC_ViewController" bundle:nil];
+    self.viewController = [[IC_FormViewController alloc] initWithNibName:@"IC_FormViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     return YES;
