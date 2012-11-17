@@ -82,13 +82,12 @@
 {
     NSLog(@"called the delegate!");
     if ([self.experimentOptions containsObject:optionPicked]) {
-        
-        [self.experiment setTitle:optionPicked forState:UIControlStateNormal];
-        [self.experiment setTitleColor:[UIColor colorWithRed:166.0f/255.0f green:71.0f/255.0f blue:219.0f/255.0f alpha:1.0f] forState:UIControlStateNormal];
+        self.experiment.titleLabel.text = optionPicked;
+        self.experiment.titleLabel.textColor = [UIColor colorWithRed:166.0f/255.0f green:71.0f/255.0f blue:219.0f/255.0f alpha:1.0f];
         [self.experimentPopoverController dismissPopoverAnimated: YES];
     } else if ([self.locationOptions containsObject:optionPicked]) {
-        [self.location setTitle:optionPicked forState:UIControlStateNormal];
-        [self.location setTitleColor:[UIColor colorWithRed:219.0f/255.0f green:74.0f/255.0f blue:59.0f/255.0f alpha:1.0f] forState:UIControlStateNormal];
+        self.location.titleLabel.text = optionPicked;
+        self.location.titleLabel.textColor = [UIColor colorWithRed:219.0f/255.0f green:74.0f/255.0f blue:59.0f/255.0f alpha:1.0f];
         [self.locationPopoverController dismissPopoverAnimated: YES];
     }
     // dismiss popover
@@ -140,11 +139,9 @@
     IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     self.model = appDelegate.model;
 
-    self.experimentOptions = self.model.experiments;
-    self.locationOptions = self.model.locations;
     self.next.enabled = NO;
-    self.experiment.titleLabel.adjustsFontSizeToFitWidth = TRUE;
-    self.location.titleLabel.adjustsFontSizeToFitWidth = TRUE;
+    self.experiment.titleLabel.adjustsFontSizeToFitWidth = YES;
+    self.location.titleLabel.adjustsFontSizeToFitWidth = YES;
 
 }
 
