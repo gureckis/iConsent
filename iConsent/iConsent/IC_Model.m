@@ -7,6 +7,8 @@
 //
 
 #import "IC_Model.h"
+#import "Reachability.h"
+#import "SBJson.h"
 #include <sys/socket.h>
 #include <sys/sysctl.h>
 #include <net/if.h>
@@ -15,15 +17,24 @@
 #include <time.h>
 
 @interface IC_Model()
+@property (nonatomic, strong) NSArray *experiments;
+@property (nonatomic, strong) NSArray *locations;
 @property (nonatomic, strong) NSMutableData *responseData;
 @property (nonatomic, strong) NSString *deviceID; // mac address
 @property (nonatomic, strong) NSString *processID; // processID
+@property (nonatomic, strong) NSString *subjectNumber;
+@property (nonatomic, strong) NSString *organizationName;
+@property (nonatomic, strong) NSString *currentExperiment;
+@property (nonatomic, strong) NSString *currentLocation;
+
 
 - (NSString *)determineMacAddress;
 - (NSString *)generateProcessIDWithLength:(int)len;
 - (NSString *)generateRandomStringWithLength:(int)len;
-- (void)getExperiments;
-- (void)getLocations;
+- (void)loadOrganizationName;
+- (void)loadExperiments;
+- (void)loadLocations;
+- (void)reserveSubjectNumber;
 @end
 
 @implementation IC_Model
@@ -31,6 +42,8 @@
 @synthesize locations = _locations;
 @synthesize deviceID = _deviceID;
 @synthesize processID = _processID;
+@synthesize subjectNumber = _subjectNumber;
+@synthesize organizationName = _organizationName;
 @synthesize responseData = _responseData;
 
 - (id)init {
@@ -43,9 +56,13 @@
         self.responseData = [NSMutableData data];
         NSLog(@"device id = %@", self.deviceID);
         NSLog(@"process id = %@", self.processID);
+        self.currentExperiment = nil;
+        self.currentLocation = nil;
         
-        [self getExperiments];
-        [self getLocations];
+        [self loadExperiments];
+        [self loadLocations];
+        [self loadOrganizationName];
+        [self reserveSubjectNumber];
     }
     return self;
 }
@@ -58,22 +75,116 @@
     return [[NSString alloc] initWithFormat:@"%@/consent", @SERVERNAME];
 }
 
-- (void)getExperiments {
-    self.experiments = [NSArray arrayWithObjects:
+- (NSArray *)getExperimentOptions {
+    return self.experiments;
+}
+
+- (NSArray *)getLocationOptions {
+    return self.locations;
+}
+
+- (NSString *)getSubjectNumber {
+    return self.subjectNumber;
+}
+
+- (NSString *)getOrganizationName {
+    return self.organizationName;
+}
+
+- (NSString *)getCurrentLocation {
+    if (self.currentLocation==nil) {
+        NSLog(@"Error!  Current location hasn't been selected yet!");
+    }
+    return self.currentLocation;
+}
+
+- (NSString *)getCurrentExperiment {
+    if (self.currentExperiment==nil) {
+        NSLog(@"Error!  Current experiment hasn't been selected yet!");
+    }
+    return self.currentExperiment;
+        
+}
+
+- (void)selectExperiment:(id)optionPicked {
+    self.currentExperiment = optionPicked;
+}
+
+- (void)selectLocation:(id)optionPicked {
+    self.currentLocation = optionPicked;
+}
+
+- (void)reserveSubjectNumber {
+    self.subjectNumber = @"05463";
+}
+
+- (void)loadOrganizationName {
+    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetOrganizationName", @SERVERNAME]]];
+    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+    NSLog(@"%@", json_string);
+    // Create SBJSON object to parse JSON
+    SBJsonParser *parser = [[SBJsonParser alloc] init];
+    id jsonresult = [parser objectWithString:json_string error:nil];
+    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"got a dictionary");
+        self.organizationName = [jsonresult objectForKey:@"org_name"];
+        NSLog(@"%@", self.organizationName);
+    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
+        NSLog(@"got an array");
+        self.organizationName = [NSArray arrayWithObjects:
                             @"Entomologist",
                             @"Tree Search",
                             @"Causal Learning",
-                        nil];
+                            nil];
+    }
 }
 
-- (void)getLocations {
-    self.locations = [NSArray arrayWithObjects:
-                        @"AMNH",
-                        @"CMOM",
-                        @"NYU - Gureckislab",
-                        @"NYU - Rhodeslab",
-                        nil];
+- (void)loadExperiments {
+    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetExperimentNames", @SERVERNAME]]];
+    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+
+    // Create SBJSON object to parse JSON
+    SBJsonParser *parser = [[SBJsonParser alloc] init];
+    id jsonresult = [parser objectWithString:json_string error:nil];
+    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"got a dictionary");
+        self.experiments = [jsonresult objectForKey:@"json_result"];
+    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
+        NSLog(@"got an array");
+        self.experiments = [NSArray arrayWithObjects:
+                                @"Entomologist",
+                                @"Tree Search",
+                                @"Causal Learning",
+                            nil];
+    }
+}
+
+- (void)loadLocations {
+
+    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetLocationNames", @SERVERNAME]]];
+    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
     
+    // Create SBJSON object to parse JSON
+    SBJsonParser *parser = [[SBJsonParser alloc] init];
+    id jsonresult = [parser objectWithString:json_string error:nil];
+    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"got a dictionary");
+        self.locations = [jsonresult objectForKey:@"json_result"];
+    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
+        NSLog(@"got an array");
+        self.locations = [NSArray arrayWithObjects:
+                          @"AMNH",
+                          @"CMOM",
+                          @"NYU - Gureckislab",
+                          @"NYU - Rhodeslab",
+                          nil];
+    }
 }
 
 - (NSString *)generateProcessIDWithLength: (int)len
@@ -157,6 +268,13 @@
     
     return macAddressString;
     
+}
+
+- (BOOL)connected
+{
+    Reachability *reachability = [Reachability reachabilityForInternetConnection];
+    NetworkStatus networkStatus = [reachability currentReachabilityStatus];
+    return !(networkStatus == NotReachable);
 }
 
 /*

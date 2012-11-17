@@ -85,10 +85,12 @@
         self.experiment.titleLabel.text = optionPicked;
         self.experiment.titleLabel.textColor = [UIColor colorWithRed:166.0f/255.0f green:71.0f/255.0f blue:219.0f/255.0f alpha:1.0f];
         [self.experimentPopoverController dismissPopoverAnimated: YES];
+        [self.model selectExperiment: optionPicked];
     } else if ([self.locationOptions containsObject:optionPicked]) {
         self.location.titleLabel.text = optionPicked;
         self.location.titleLabel.textColor = [UIColor colorWithRed:219.0f/255.0f green:74.0f/255.0f blue:59.0f/255.0f alpha:1.0f];
         [self.locationPopoverController dismissPopoverAnimated: YES];
+        [self.model selectLocation: optionPicked];
     }
     // dismiss popover
     [self showNextButton];
@@ -142,7 +144,31 @@
     self.next.enabled = NO;
     self.experiment.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.location.titleLabel.adjustsFontSizeToFitWidth = YES;
+    self.orgname.adjustsFontSizeToFitWidth = YES;
+    
+    
+    // check for internet connection
+    if(![self.model connected]) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, this application requires a working Internet connection!  Please check your network settings and relaunch the app." delegate:nil cancelButtonTitle:@"Quit" otherButtonTitles: nil];
+        [alert setDelegate:self];
+        [alert show];
+    } else {
+        // load experiment names
+        self.experimentOptions = [self.model getExperimentOptions];
+        // load locations
+        self.locationOptions = [self.model getLocationOptions];
+        //reserve subject id
+        self.subjectnumber.text = [self.model getSubjectNumber];
+        self.orgname.text = [self.model getOrganizationName];
+    }
+    
+}
 
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Quit"]) {
+        exit(0);
+    }
 }
 
 - (void)didReceiveMemoryWarning

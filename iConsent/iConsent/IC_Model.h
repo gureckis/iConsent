@@ -20,8 +20,15 @@
 #define QUITEARLY 5
 
 @interface IC_Model : NSObject
-@property (nonatomic, strong) NSArray *experiments;
-@property (nonatomic, strong) NSArray *locations;
 - (NSString *)getServerName;
 - (NSString *)getConsentURL;
+- (NSArray *)getExperimentOptions;
+- (NSArray *)getLocationOptions;
+- (NSString *)getSubjectNumber;
+- (NSString *)getOrganizationName;
+- (NSString *)getCurrentLocation;
+- (NSString *)getCurrentExperiment;
+- (void)selectExperiment:(id)optionPicked;
+- (void)selectLocation:(id)optionPicked;
+- (BOOL)connected;
 @end

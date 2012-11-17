@@ -12,9 +12,10 @@
 #import "IC_AppDelegate.h"
 #import "IC_FormViewController.h"
 
-@interface IC_StudyInfoForm : UIViewController <UIPopoverControllerDelegate, IC_OptionSelectDelegate>
+@interface IC_StudyInfoForm : UIViewController <UIPopoverControllerDelegate, IC_OptionSelectDelegate, UIAlertViewDelegate>
 
 @property (strong, nonatomic) IC_Model *model;
+@property (strong, nonatomic) IBOutlet UILabel *orgname;
 @property (strong, nonatomic) IBOutlet UILabel *subjectnumber;
 @property (strong, nonatomic) IBOutlet UILabel *date;
 @property (strong, nonatomic) IBOutlet UILabel *time;

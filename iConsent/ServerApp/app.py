@@ -18,10 +18,10 @@ from functools import wraps
 
 from config import config
 
-DATABASE = 'mysql://lab:2research@gureckislab.org:3306/ipad_experiments'   # 'sqlite:///:memory:' - tests in memory
-TABLENAME = 'rectangle_game_v0'
+DATABASE = config.get('Database Parameters', 'database_url')
+TABLENAME = config.get('Database Parameters', 'table_name')
+UPLOAD_FOLDER = config.get('Database Parameters', 'upload_folder')
 
-UPLOAD_FOLDER = 'signatures'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
 CONSENTED = 1
 STARTED = 2
@@ -30,8 +30,8 @@ DEBRIEFED = 4
 QUITEARLY = 5
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
- 
+#app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
+
 # Column('subjID', Integer, primary_key=True),
 # Column('ipaddress', String(128)),
 # Column('deviceID', String(128)),
@@ -52,6 +52,10 @@ app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
 # Column('counterbalance', Integer),
 # Column('datafile', Text, nullable=True),  #the data from the exp
 
+
+#----------------------------------------------
+# lists the subject info
+#----------------------------------------------
 @app.route('/subjectinfo', methods=['POST'])
 def update_subject():
     if request.method == 'POST':
@@ -75,9 +79,17 @@ def update_subject():
             print "ERROR"
             return jsonify(status="error")
 
+
+#----------------------------------------------
+# allowed file names for signature upload
+#----------------------------------------------
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
+#----------------------------------------------
+# reserve a subject number
+#----------------------------------------------
 @app.route('/reserve', methods=['POST'])
 def reserve_new_subject():
     if request.method == 'POST':
@@ -139,6 +151,33 @@ def reserve_new_subject():
             return jsonify(status="error")
 
 
+#----------------------------------------------
+# get organization name
+#----------------------------------------------
+@app.route('/GetOrganizationName', methods=['GET'])
+def get_org_name():
+    myorg = "New York Universitae"
+    return jsonify(org_name=myorg)
+
+#----------------------------------------------
+# get experiment parameters
+#----------------------------------------------
+@app.route('/GetExperimentNames', methods=['GET'])
+def get_experiment_names():
+    mylist = ["Entomologist", "Causal Learning", "Tree Game", "Social Learning"]
+    return jsonify(json_result=mylist)
+
+#----------------------------------------------
+# get location parameters
+#----------------------------------------------
+@app.route('/GetLocationNames', methods=['GET'])
+def get_location_names():
+    mylist = ["AMNH", "CMOM", "NYU - Somewhere else", "NYU - Gureckis Lab", "NYU - Rhodes Lab"]
+    return jsonify(json_result=mylist)
+
+#----------------------------------------------
+# load the consent form
+#----------------------------------------------
 @app.route('/consent', methods=['GET'])
 def give_consent():
     return render_template('consent.html')
@@ -198,6 +237,9 @@ def createdatabase(engine, metadata):
     return participants
 
 
+#----------------------------------------------
+# loaddatabase from scratch
+#----------------------------------------------
 def loaddatabase(engine, metadata):
     # try to load tables from a file, if that fails create new tables
     try:
