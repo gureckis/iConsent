@@ -11,6 +11,7 @@
 #import "IC_OptionSelect.h"
 #import "IC_AppDelegate.h"
 #import "IC_FormViewController.h"
+#import "DCRoundSwitch.h"
 
 @interface IC_StudyInfoForm : UIViewController <UIPopoverControllerDelegate, IC_OptionSelectDelegate, UIAlertViewDelegate>
 
@@ -22,9 +23,11 @@
 @property (strong, nonatomic) IBOutlet UIButton *experiment;
 @property (strong, nonatomic) IBOutlet UIButton *location;
 @property (strong, nonatomic) IBOutlet UIButton *next;
+@property (strong, nonatomic) IBOutlet DCRoundSwitch *childSwitch;
 
 - (IBAction)showExperiments:(id)sender;
 - (IBAction)showLocations:(id)sender;
 //- (IBAction)backgroundTap:(id)sender;
 - (IBAction)nextForm:(id)sender;
+- (IBAction)childToggled:(id)sender;
 @end

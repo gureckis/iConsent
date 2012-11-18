@@ -26,6 +26,7 @@
 @synthesize locationPopoverController = _locationPopoverController;
 @synthesize experimentOptions = _experimentOptions;
 @synthesize locationOptions = _locationOptions;
+@synthesize childSwitch = _childSwitch;
 
 #pragma mark - Interaction Elements
 
@@ -106,6 +107,11 @@
     }
 }
 
+- (IBAction)childToggled:(id)sender
+{
+    [self.model isChildStudy:self.childSwitch.on];
+}
+
 #pragma mark - Popup stuff
 
 //---called when the user clicks outside the popover view---
@@ -145,7 +151,14 @@
     self.experiment.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.location.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.orgname.adjustsFontSizeToFitWidth = YES;
-    
+
+    // load yes/no switch
+    self.childSwitch.onText = @"YES";
+    self.childSwitch.offText = @"NO";
+    self.childSwitch.onTintColor = [UIColor blackColor];
+    [self.childSwitch addTarget:self action:@selector(childToggled:) forControlEvents:UIControlEventValueChanged];
+    self.childSwitch.on = NO;
+
     
     // check for internet connection
     if(![self.model connected]) {
