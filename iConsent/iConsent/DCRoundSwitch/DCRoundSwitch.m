@@ -396,8 +396,13 @@
 			self.ignoreTap = NO;
 
 			// send the action here so it get's sent at the end of the animations
-			if (previousOn != on && !ignoreControlEvents)
-				[self sendActionsForControlEvents:UIControlEventValueChanged];
+			if (previousOn != on && !ignoreControlEvents) {
+				//[self sendActionsForControlEvents:UIControlEventValueChanged];
+                [CATransaction begin];
+                [CATransaction setDisableActions:NO];
+                [self sendActionsForControlEvents:UIControlEventValueChanged];
+                [CATransaction commit];
+            }
 
 			[[self allTargets] makeObjectsPerformSelector:@selector(release)];
 		}];
