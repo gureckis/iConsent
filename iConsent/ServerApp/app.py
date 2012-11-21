@@ -4,8 +4,6 @@
 #  Created by Todd Gureckis on 3/12/12.
 #  Copyright (c) 2012 New York University. All rights reserved.
 
-from flask import Flask, render_template, request, Response, jsonify, send_from_directory
-from werkzeug import secure_filename
 from string import split
 import os
 import time
@@ -16,69 +14,24 @@ import sys
 from sqlalchemy import *
 from functools import wraps
 
+# importing the Flask library
+from flask import Flask, render_template, request, Response, jsonify, send_from_directory
+from werkzeug import secure_filename
+
+# Database setup
+from db import db_session, init_db
+from models import Participant, Experiment, Location
+from sqlalchemy import or_, and_
+
+# loads configuation
 from config import config
 
-DATABASE = config.get('Database Parameters', 'database_url')
-TABLENAME = config.get('Database Parameters', 'table_name')
 UPLOAD_FOLDER = config.get('Database Parameters', 'upload_folder')
-
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
-CONSENTED = 1
-STARTED = 2
-COMPLETED = 3
-DEBRIEFED = 4
-QUITEARLY = 5
+
 
 app = Flask(__name__)
 #app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
-
-# Column('subjID', Integer, primary_key=True),
-# Column('ipaddress', String(128)),
-# Column('deviceID', String(128)),
-# Column('processID', String(128)),
-# Column('firstName', String(128)),
-# Column('lastName', String(128)),
-# Column('gender', String(128)),
-# Column('birthDate', String(128)),
-# Column('location', String(128)),
-# Column('consent', Boolean),
-# Column('signature', String(128)), # this probably needs a different datatype
-# Column('reservationTimeStamp', DateTime(), nullable=True),
-# Column('beginExpTimeStamp', DateTime(), nullable=True),
-# Column('endExpTimeStamp', DateTime(), nullable=True),
-# Column('status', Integer),
-# Column('debriefed', Boolean),
-# Column('cond', Integer),
-# Column('counterbalance', Integer),
-# Column('datafile', Text, nullable=True),  #the data from the exp
-
-
-#----------------------------------------------
-# lists the subject info
-#----------------------------------------------
-@app.route('/subjectinfo', methods=['POST'])
-def update_subject():
-    if request.method == 'POST':
-        #print "GOT A POST REQUEST", request.form.keys()
-        if request.form.has_key('subjid') and request.form.has_key('firstName') and request.form.has_key('lastName') and request.form.has_key('gender') \
-            and request.form.has_key('birthdate') and request.form.has_key('location'):
-            subjid = request.form['subjid']
-            firstName = request.form['firstName']
-            lastName = request.form['lastName']
-            gender = request.form['gender']
-            birthDate = request.form['birthdate']
-            location = request.form['location']
-            print firstName, lastName, gender, birthDate, location
-            # # see if this pair already exists
-            conn = engine.connect()
-            results = conn.execute(participantsdb.update().where(participantsdb.c.subjID==subjid).values( \
-                firstName=firstName, lastName=lastName, gender=gender, birthDate=birthDate, location=location, beginExpTimeStamp=datetime.datetime.now(), status=STARTED))
-            conn.close()
-            return jsonify(state="success")
-        else:
-            print "ERROR"
-            return jsonify(status="error")
-
 
 #----------------------------------------------
 # allowed file names for signature upload
@@ -86,94 +39,137 @@ def update_subject():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+#/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+# db setup
+#/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+
+#----------------------------------------------
+# DB setup
+#----------------------------------------------
+@app.teardown_request
+def shutdown_session(exception=None):
+    db_session.remove()
+
+
+#/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+# routes
+#/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*
+
+
+###########################################################
+# informational
+###########################################################
+
+#----------------------------------------------
+# get general experiment info
+#----------------------------------------------
+@app.route('/GetServerInfo', methods=['GET'])
+def get_server_info():
+    org = config.get('General Info', 'org_name')
+    locations = Location.query.all()
+    mylocs = [i.locname for i in locations]
+    experiments = Experiment.query.filter_by(active=True).all()
+    myexps = [i.expname for i in experiments]
+    db_session.commit()
+    return jsonify(org_name=org, locations=mylocs, experiments=myexps)
+
+
+###########################################################
+# take action!
+###########################################################
 
 #----------------------------------------------
 # reserve a subject number
 #----------------------------------------------
-@app.route('/reserve', methods=['POST'])
+@app.route('/MakeReservation', methods=['POST'])
 def reserve_new_subject():
     if request.method == 'POST':
-        #print "GOT A POST REQUEST", request.form.keys()
         if request.form.has_key('deviceID') and request.form.has_key('processID'):
+
             deviceID = request.form['deviceID']
             processID = request.form['processID']
-            print deviceID, processID
+            
             # see if this pair already exists
-            conn = engine.connect()
-            s = select([participantsdb.c.subjID])
-            s = s.where(and_(participantsdb.c.processID==processID, participantsdb.c.deviceID==deviceID))
-            result = conn.execute(s)
-            matches = [row for row in result]
+            matches = Participant.query.filter_by(deviceid=deviceID).filter_by(processid=processID).all()
             numrecs = len(matches)
             if numrecs == 0:
-                # doesn't exist, assign condition number and counterbalancing condition
-                print "this process doesn't exist"
-                
-                
-                subj_cond = 10
-                subj_counter = 100
-                
-                if request.remote_addr == None:
-                    myip = "UNKNOWNIP"
-                else:
-                    myip = request.remote_addr
+                ipaddr = request.remote_addr
+                if ipaddr == None:
+                    ipaddr = "UNKNOWNIP"
                     
                 # set these up and insert into database
-                result = conn.execute(participantsdb.insert(),
-                    ipaddress = myip,
-                    deviceID = deviceID,
-                    processID = processID,
-                    cond=subj_cond,
-                    consent=True,
-                    counterbalance = subj_counter,
-                    status = CONSENTED,
-                    signatureRecv = False,
-                    reservationTimeStamp = datetime.datetime.now()
-                )
-                
-                myid = result.inserted_primary_key[0]
-                
-                if request.files.has_key('signature'):
-                    file = request.files['signature']
-                    if file and allowed_file(file.filename):
-                        filename = str(myid)+'.jpg'
-                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        results = conn.execute(participantsdb.update().where(participantsdb.c.subjID==myid).values(signatureRecv=True))
-                conn.close()
-                return jsonify(subjid=myid, cond=subj_cond, counterbalance=subj_counter)
+                part = Participant(ipaddr, deviceID, processID)
+                db_session.add(part)
+                db_session.commit()
+                return jsonify(subjid=str(part.pid))
             else:
                 # this already exists.  something weird is happening
-                print "it seems thie device/process id exist already"
-                conn.close()
-                return jsonify(status="error")
+                msg = "this device/process id exist already"
+                print msg
+                db_session.commit()
+                return jsonify(status="error", msg=msg)
         else:
-            print "didn't get the device and processid"
-            return jsonify(status="error")
+            msg = "didn't get the device and processid"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
 
-
-#----------------------------------------------
-# get organization name
-#----------------------------------------------
-@app.route('/GetOrganizationName', methods=['GET'])
-def get_org_name():
-    myorg = "New York Universitae"
-    return jsonify(org_name=myorg)
-
-#----------------------------------------------
-# get experiment parameters
-#----------------------------------------------
-@app.route('/GetExperimentNames', methods=['GET'])
-def get_experiment_names():
-    mylist = ["Entomologist", "Causal Learning", "Tree Game", "Social Learning"]
-    return jsonify(json_result=mylist)
-
-#----------------------------------------------
-# get location parameters
-#----------------------------------------------
-@app.route('/GetLocationNames', methods=['GET'])
-def get_location_names():
-    mylist = ["AMNH", "CMOM", "NYU - Somewhere else", "NYU - Gureckis Lab", "NYU - Rhodes Lab"]
-    return jsonify(json_result=mylist)
+@app.route('/StudyInfoFinished', methods=['POST'])
+def study_info_finished():
+    if request.method == 'POST':
+        if request.form.has_key('subjectNumber') \
+            and request.form.has_key('subjectID') and request.form.has_key('childStudy') \
+            and request.form.has_key('currentExperiment') and request.form.has_key('currentLocation'):
+            
+            subjectNumber = request.form['subjectNumber']
+            subjectID = request.form['subjectID']
+            childStudy = request.form['childStudy']
+            currentExperiment = request.form['currentExperiment']
+            currentLocation = request.form['currentLocation']
+            
+            print subjectNumber, subjectID, childStudy, currentExperiment, currentLocation
+            # see if this pair already exists
+            person = Participant.query.filter_by(pid=subjectNumber).one()
+            if person:
+                person.subjectid = subjectID
+                person.child = childStudy
+                exp = Experiment.query.filter_by(expname=currentExperiment).one()
+                if exp:
+                    person.expid = exp.expid
+                else:
+                    msg = "Error looking up experiment"
+                    print msg
+                    return jsonify(status="error", msg=msg)
+                loc = Location.query.filter_by(locname=currentLocation).one()
+                if loc:
+                    person.locid = loc.locid
+                else:
+                    msg = "Error looking up location"
+                    print msg
+                    return jsonify(status="error", msg=msg)
+                db_session.add(person)
+                db_session.commit()
+                # this already exists.  something weird is happening
+                msg = "everything seems to have gone ok"
+                print msg
+                return jsonify(status="success", msg=msg)
+            else:
+                # this already exists.  something weird is happening
+                msg = "this device/process id exists already"
+                print msg
+                db_session.commit()
+                return jsonify(status="error", msg=msg)
+        else:
+            msg = "didn't get the device and processid"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
 
 #----------------------------------------------
 # load the consent form
@@ -181,6 +177,40 @@ def get_location_names():
 @app.route('/consent', methods=['GET'])
 def give_consent():
     return render_template('consent.html')
+
+#@app.route('/demo', methods=['GET'])
+#def demo():
+#
+#    # add an experiment
+#    exp = Experiment('Causal Learning', True)
+#    db_session.add(exp)
+#    db_session.commit()
+#
+#    # add a location
+#    loc = Location('NYU - Gureckis lab')
+#    db_session.add(loc)
+#    db_session.commit()
+#
+#    # add a first person
+#    part = Participant('myipaddress', 'mydeviceid', 'processid')
+#    part.exp = exp
+#    part.loc = loc
+#    db_session.add(part)
+#    db_session.commit()
+#    
+#    # add a second person
+#    part = Participant('myipaddres2', 'mydeviceid2', 'processid2')
+#    part.exp = exp
+#    part.loc = loc
+#    db_session.add(part)
+#    db_session.commit()
+#
+#    # participant
+#    part = Participant.query.\
+#        filter(Participant.ipaddress == 'myipaddress').\
+#        one()
+#    print part.expid
+#    print part.exp.expname
 
 #----------------------------------------------
 # generic route
@@ -199,74 +229,15 @@ def regularpage(pagename=None):
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-#----------------------------------------------
-# database management
-#----------------------------------------------
-def createdatabase(engine, metadata):
-    
-    # try to load tables from a file, if that fails create new tables
-    try:
-        participants = Table(TABLENAME, metadata, autoload=True)
-    except: # can you put in the specific exception here?
-        # ok will create the database
-        print "ok will create the participant database"
-        participants = Table(TABLENAME, metadata,
-          Column('subjID', Integer, primary_key=True),
-          Column('ipaddress', String(128)),
-          Column('deviceID', String(128)),
-          Column('processID', String(128)),
-          Column('firstName', String(128)),
-          Column('lastName', String(128)),
-          Column('gender', String(128)),
-          Column('birthDate', String(128)),
-          Column('location', String(128)),
-          Column('consent', Boolean),
-          Column('signatureRecv', Boolean), # this probably needs a different datatype
-          Column('reservationTimeStamp', DateTime(), nullable=True),
-          Column('beginExpTimeStamp', DateTime(), nullable=True),
-          Column('endExpTimeStamp', DateTime(), nullable=True),
-          Column('status', Integer),
-          Column('debriefed', Boolean),
-          Column('cond', Integer),
-          Column('counterbalance', Integer),
-          Column('datafile', Text, nullable=True),  #the data from the exp
-        )
-        participants.create()
-    return participants
-
-
-#----------------------------------------------
-# loaddatabase from scratch
-#----------------------------------------------
-def loaddatabase(engine, metadata):
-    # try to load tables from a file, if that fails create new tables
-    try:
-        participants = Table(TABLENAME, metadata, autoload=True)
-    except: # can you put in the specific exception here?
-        print "Error, participants table doesn't exist"
-        exit()
-    return participants
-
+            'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 ###########################################################
 # let's start
 ###########################################################
+
+# intialize database if necessary
+init_db()
+
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print "Useage: python webapp.py [initdb/server]"
-    elif len(sys.argv)>1:
-        engine = create_engine(DATABASE, echo=False) 
-        metadata = MetaData()
-        metadata.bind = engine
-        if sys.argv[1]=='initdb':
-            print "initializing database"
-            createdatabase(engine, metadata)
-            pass
-        elif sys.argv[1]=='server':
-            print "starting webserver"
-            participantsdb = loaddatabase(engine, metadata)
-            # by default just launch webserver
-            app.run(debug=True, host='0.0.0.0', port=5003)
+    app.run(debug=True, host='0.0.0.0', port=5003)
 
