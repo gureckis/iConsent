@@ -34,6 +34,8 @@
     if(![self.experiment.titleLabel.text isEqualToString:@"********************"] &&
        ![self.location.titleLabel.text isEqualToString:@"********************"]
        ) {
+        // tell model to update database
+        [self.model studyFormFinished];
         // return to experiment
         IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
         [appDelegate.viewController getStudyInfoIsFinished];
@@ -109,7 +111,22 @@
 
 - (IBAction)childToggled:(id)sender
 {
-    [self.model isChildStudy:self.childSwitch.on];
+    self.model.childStudy = self.childSwitch.on;
+    [self.model updateSubjectID];
+    self.subjectnumber.text = self.model.subjectID;
+}
+
+#pragma mark - IC_ModelDelegate Functions
+
+-(void)reservationComplete {
+    // get organization name
+    self.orgname.text = self.model.organizationName;
+    // load experiment names
+    self.experimentOptions = self.model.experimentOptions;
+    // load locations
+    self.locationOptions = self.model.locationOptions;
+    //reserve subject id
+    self.subjectnumber.text = self.model.subjectID;
 }
 
 #pragma mark - Popup stuff
@@ -146,33 +163,27 @@
     // Do any additional setup after loading the view from its nib.
     IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     self.model = appDelegate.model;
+    self.model.delegate = self;
 
     self.next.enabled = NO;
     self.experiment.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.location.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.orgname.adjustsFontSizeToFitWidth = YES;
+    self.subjectnumber.adjustsFontSizeToFitWidth = YES;
 
     // load yes/no switch
     self.childSwitch.onText = @"YES";
     self.childSwitch.offText = @"NO";
-    self.childSwitch.onTintColor = [UIColor blackColor];
+    self.childSwitch.onTintColor = [UIColor blueColor];
     [self.childSwitch addTarget:self action:@selector(childToggled:) forControlEvents:UIControlEventValueChanged];
     self.childSwitch.on = NO;
-
     
-    // check for internet connection
-    if(![self.model connected]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, this application requires a working Internet connection!  Please check your network settings and relaunch the app." delegate:nil cancelButtonTitle:@"Quit" otherButtonTitles: nil];
-        [alert setDelegate:self];
-        [alert show];
-    } else {
-        // load experiment names
-        self.experimentOptions = [self.model getExperimentOptions];
-        // load locations
-        self.locationOptions = [self.model getLocationOptions];
-        //reserve subject id
-        self.subjectnumber.text = [self.model getSubjectNumber];
-        self.orgname.text = [self.model getOrganizationName];
+    
+    // load options from the server
+    if ([self.model loadServerInfo]) {
+        NSLog(@"couldn't load server");
+        // make reservation on server
+        [self.model makeAReservation];
     }
     
 }

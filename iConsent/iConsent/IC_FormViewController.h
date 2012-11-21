@@ -13,7 +13,7 @@
 #import "IC_StudyInfoForm.h"
 #import "IC_ConsentForm.h"
 
-@interface IC_FormViewController : UIViewController
+@interface IC_FormViewController : UIViewController <IC_ModelInterfaceDelegate>
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) UIViewController *viewController;
 @property (nonatomic, strong) IC_Model *model;

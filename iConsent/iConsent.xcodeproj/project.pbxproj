@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		640C8C85165AA211007EC8D8 /* models.py in Resources */ = {isa = PBXBuildFile; fileRef = 640C8C84165AA211007EC8D8 /* models.py */; };
+		640C8C88165AAA5B007EC8D8 /* db.py in Resources */ = {isa = PBXBuildFile; fileRef = 640C8C87165AAA5B007EC8D8 /* db.py */; };
 		641262A5164DA735009FA87B /* DCRoundSwitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6412629C164DA735009FA87B /* DCRoundSwitch.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		641262A6164DA735009FA87B /* DCRoundSwitchKnobLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6412629E164DA735009FA87B /* DCRoundSwitchKnobLayer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		641262A7164DA735009FA87B /* DCRoundSwitchOutlineLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 641262A0164DA735009FA87B /* DCRoundSwitchOutlineLayer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -29,6 +31,8 @@
 		642B703A1656F35B00907FEA /* SBJsonTokeniser.m in Sources */ = {isa = PBXBuildFile; fileRef = 642B702A1656F35B00907FEA /* SBJsonTokeniser.m */; };
 		642B703B1656F35B00907FEA /* SBJsonUTF8Stream.m in Sources */ = {isa = PBXBuildFile; fileRef = 642B702C1656F35B00907FEA /* SBJsonUTF8Stream.m */; };
 		642B703C1656F35B00907FEA /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 642B702E1656F35B00907FEA /* SBJsonWriter.m */; };
+		642B70411658959B00907FEA /* IC_SubjectInfoFormChild.m in Sources */ = {isa = PBXBuildFile; fileRef = 642B703F1658959A00907FEA /* IC_SubjectInfoFormChild.m */; };
+		642B70421658959B00907FEA /* IC_SubjectInfoFormChild.xib in Resources */ = {isa = PBXBuildFile; fileRef = 642B70401658959B00907FEA /* IC_SubjectInfoFormChild.xib */; };
 		64357C89164DAA9B00D5B48B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64357C88164DAA9B00D5B48B /* QuartzCore.framework */; };
 		64357C96164DB4D300D5B48B /* IC_ConsentForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 64357C94164DB4D300D5B48B /* IC_ConsentForm.m */; };
 		64357C97164DB4D300D5B48B /* IC_ConsentForm.xib in Resources */ = {isa = PBXBuildFile; fileRef = 64357C95164DB4D300D5B48B /* IC_ConsentForm.xib */; };
@@ -61,6 +65,8 @@
 
 /* Begin PBXFileReference section */
 		6405A13E1642E80E009865A2 /* config.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config.txt; sourceTree = "<group>"; wrapsLines = 1; };
+		640C8C84165AA211007EC8D8 /* models.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = models.py; sourceTree = "<group>"; };
+		640C8C87165AAA5B007EC8D8 /* db.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = db.py; sourceTree = "<group>"; };
 		6412629B164DA735009FA87B /* DCRoundSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCRoundSwitch.h; sourceTree = "<group>"; };
 		6412629C164DA735009FA87B /* DCRoundSwitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCRoundSwitch.m; sourceTree = "<group>"; };
 		6412629D164DA735009FA87B /* DCRoundSwitchKnobLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCRoundSwitchKnobLayer.h; sourceTree = "<group>"; };
@@ -101,6 +107,9 @@
 		642B702C1656F35B00907FEA /* SBJsonUTF8Stream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonUTF8Stream.m; sourceTree = "<group>"; };
 		642B702D1656F35B00907FEA /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 		642B702E1656F35B00907FEA /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonWriter.m; sourceTree = "<group>"; };
+		642B703E1658959A00907FEA /* IC_SubjectInfoFormChild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_SubjectInfoFormChild.h; sourceTree = "<group>"; };
+		642B703F1658959A00907FEA /* IC_SubjectInfoFormChild.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_SubjectInfoFormChild.m; sourceTree = "<group>"; };
+		642B70401658959B00907FEA /* IC_SubjectInfoFormChild.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_SubjectInfoFormChild.xib; sourceTree = "<group>"; };
 		64357C88164DAA9B00D5B48B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		64357C93164DB4D200D5B48B /* IC_ConsentForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_ConsentForm.h; sourceTree = "<group>"; };
 		64357C94164DB4D300D5B48B /* IC_ConsentForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_ConsentForm.m; sourceTree = "<group>"; };
@@ -306,6 +315,9 @@
 				64357C93164DB4D200D5B48B /* IC_ConsentForm.h */,
 				64357C94164DB4D300D5B48B /* IC_ConsentForm.m */,
 				64357C95164DB4D300D5B48B /* IC_ConsentForm.xib */,
+				642B703E1658959A00907FEA /* IC_SubjectInfoFormChild.h */,
+				642B703F1658959A00907FEA /* IC_SubjectInfoFormChild.m */,
+				642B70401658959B00907FEA /* IC_SubjectInfoFormChild.xib */,
 				6463D064162F1AD4000A8D3B /* Supporting Files */,
 				645BB813164CCA0800BA3580 /* IC_OptionSelect.h */,
 				645BB814164CCA0800BA3580 /* IC_OptionSelect.m */,
@@ -333,6 +345,8 @@
 			children = (
 				64BBDD29163095F100CFF691 /* app.py */,
 				64BBDD3B1630AC6D00CFF691 /* config.py */,
+				640C8C84165AA211007EC8D8 /* models.py */,
+				640C8C87165AAA5B007EC8D8 /* db.py */,
 				6405A13E1642E80E009865A2 /* config.txt */,
 				64BBDD3C1630ACC500CFF691 /* config.txt.example */,
 				64BBDD2A163095F100CFF691 /* images */,
@@ -445,6 +459,9 @@
 				64357CA6164DB76100D5B48B /* t1_logo.png in Resources */,
 				642B702F1656F35B00907FEA /* LICENSE.md in Resources */,
 				642B70311656F35B00907FEA /* README.md in Resources */,
+				642B70421658959B00907FEA /* IC_SubjectInfoFormChild.xib in Resources */,
+				640C8C85165AA211007EC8D8 /* models.py in Resources */,
+				640C8C88165AAA5B007EC8D8 /* db.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -479,6 +496,7 @@
 				642B703A1656F35B00907FEA /* SBJsonTokeniser.m in Sources */,
 				642B703B1656F35B00907FEA /* SBJsonUTF8Stream.m in Sources */,
 				642B703C1656F35B00907FEA /* SBJsonWriter.m in Sources */,
+				642B70411658959B00907FEA /* IC_SubjectInfoFormChild.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -175,4 +175,10 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - IC_Model Delegates
+-(void)unrecoverableErrorWithMsg:(NSString *)msg {
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:msg delegate:self cancelButtonTitle:@"Quit" otherButtonTitles: nil];
+    [alert show];
+}
+
 @end

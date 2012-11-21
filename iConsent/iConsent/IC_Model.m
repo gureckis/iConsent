@@ -17,34 +17,31 @@
 #include <time.h>
 
 @interface IC_Model()
-@property (nonatomic, strong) NSArray *experiments;
-@property (nonatomic, strong) NSArray *locations;
-@property (nonatomic, strong) NSMutableData *responseData;
-@property (nonatomic, strong) NSString *deviceID; // mac address
-@property (nonatomic, strong) NSString *processID; // processID
-@property (nonatomic, strong) NSString *subjectNumber;
-@property (nonatomic, strong) NSString *organizationName;
-@property (nonatomic, strong) NSString *currentExperiment;
-@property (nonatomic, strong) NSString *currentLocation;
-
-
+@property (nonatomic, strong) NSURLConnection *reserveConnection;
+@property (nonatomic, strong) NSURLConnection *studyInfoConnection;
+- (void)internetUnreachable;
+- (void)serverUnresponsive;
+- (void)badInput;
 - (NSString *)determineMacAddress;
 - (NSString *)generateProcessIDWithLength:(int)len;
 - (NSString *)generateRandomStringWithLength:(int)len;
-- (void)loadOrganizationName;
-- (void)loadExperiments;
-- (void)loadLocations;
-- (void)reserveSubjectNumber;
+- (NSMutableURLRequest *)makePOSTRequestWithURL:(NSString *)url andKeys:(NSDictionary *)keyValues;
 @end
 
 @implementation IC_Model
-@synthesize experiments = _experiments;
-@synthesize locations = _locations;
+@synthesize reserveConnection = _reserveConnection;
+@synthesize studyInfoConnection = _studyInfoConnection;
+@synthesize experimentOptions = _experimentOptions;
+@synthesize locationOptions = _locationOptions;
 @synthesize deviceID = _deviceID;
 @synthesize processID = _processID;
 @synthesize subjectNumber = _subjectNumber;
+@synthesize subjectID = _subjectID;
 @synthesize organizationName = _organizationName;
 @synthesize responseData = _responseData;
+@synthesize childStudy = _childStudy;
+@synthesize delegate = _delegate;
+@synthesize interfaceDelegate = _interfaceDelegate;
 
 - (id)init {
     self = [super init];
@@ -53,19 +50,19 @@
         srandom(time(NULL));
         self.deviceID = [self determineMacAddress];
         self.processID = [self generateProcessIDWithLength:10];
+        self.subjectID = @"******";
         self.responseData = [NSMutableData data];
         NSLog(@"device id = %@", self.deviceID);
         NSLog(@"process id = %@", self.processID);
         self.currentExperiment = nil;
         self.currentLocation = nil;
-        
-        [self loadExperiments];
-        [self loadLocations];
-        [self loadOrganizationName];
-        [self reserveSubjectNumber];
+        self.childStudy = NO;
+        self.delegate = nil;
     }
     return self;
 }
+
+
 
 - (NSString *)getServerName {
     return @SERVERNAME;
@@ -75,16 +72,9 @@
     return [[NSString alloc] initWithFormat:@"%@/consent", @SERVERNAME];
 }
 
-- (NSArray *)getExperimentOptions {
-    return self.experiments;
-}
 
-- (NSArray *)getLocationOptions {
-    return self.locations;
-}
-
-- (NSString *)getSubjectNumber {
-    return self.subjectNumber;
+- (NSString *)getSubjectID {
+    return self.subjectID;
 }
 
 - (NSString *)getOrganizationName {
@@ -114,78 +104,174 @@
     self.currentLocation = optionPicked;
 }
 
-- (void)reserveSubjectNumber {
-    self.subjectNumber = @"05463";
-}
-
-- (void)loadOrganizationName {
-    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetOrganizationName", @SERVERNAME]]];
-    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
-    NSLog(@"%@", json_string);
-    // Create SBJSON object to parse JSON
-    SBJsonParser *parser = [[SBJsonParser alloc] init];
-    id jsonresult = [parser objectWithString:json_string error:nil];
-    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"got a dictionary");
-        self.organizationName = [jsonresult objectForKey:@"org_name"];
-        NSLog(@"%@", self.organizationName);
-    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
-        NSLog(@"got an array");
-        self.organizationName = [NSArray arrayWithObjects:
-                            @"Entomologist",
-                            @"Tree Search",
-                            @"Causal Learning",
-                            nil];
+- (BOOL)loadServerInfo {
+    if ([self connected]) {
+        // parse the JSON string into an object - assuming json_string is a NSString of JSON data
+        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetServerInfo", @SERVERNAME]]];
+        NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+        if (response) {
+            NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+            NSLog(@"resulting JSON: %@", json_string);
+            SBJsonParser *parser = [[SBJsonParser alloc] init];
+            id jsonresult = [parser objectWithString:json_string error:nil];
+            if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+                // get the results
+                if ([[jsonresult objectForKey:@"status"] isEqualToString:@"error"]) {
+                    NSString *errormsg = [jsonresult objectForKey:@"msg"];
+                    [self.interfaceDelegate unrecoverableErrorWithMsg: errormsg];
+                } else {
+                    // get the results
+                    self.organizationName = [jsonresult objectForKey:@"org_name"];
+                    self.experimentOptions = [jsonresult objectForKey:@"experiments"];
+                    self.locationOptions = [jsonresult objectForKey:@"locations"];
+                }
+            } else {
+                // send a bad response error
+                [self badInput];
+                return IC_MODEL_FAILURE;
+            }
+        } else {
+            // connection failed
+            [self serverUnresponsive];
+            return IC_MODEL_FAILURE;
+        }
+    } else {
+        [self internetUnreachable];
+        return IC_MODEL_FAILURE;
     }
+    return IC_MODEL_SUCCESS;
 }
 
-- (void)loadExperiments {
-    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetExperimentNames", @SERVERNAME]]];
-    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
 
-    // Create SBJSON object to parse JSON
-    SBJsonParser *parser = [[SBJsonParser alloc] init];
-    id jsonresult = [parser objectWithString:json_string error:nil];
-    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"got a dictionary");
-        self.experiments = [jsonresult objectForKey:@"json_result"];
-    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
-        NSLog(@"got an array");
-        self.experiments = [NSArray arrayWithObjects:
-                                @"Entomologist",
-                                @"Tree Search",
-                                @"Causal Learning",
-                            nil];
-    }
-}
 
-- (void)loadLocations {
 
-    // parse the JSON string into an object - assuming json_string is a NSString of JSON data
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[[NSString alloc] initWithFormat:@"%@/GetLocationNames", @SERVERNAME]]];
-    NSData *response = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-    NSString *json_string = [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding];
+- (BOOL)makeAReservation {
     
-    // Create SBJSON object to parse JSON
-    SBJsonParser *parser = [[SBJsonParser alloc] init];
-    id jsonresult = [parser objectWithString:json_string error:nil];
-    if ([jsonresult isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"got a dictionary");
-        self.locations = [jsonresult objectForKey:@"json_result"];
-    } else if ([jsonresult isKindOfClass:[NSArray class]]) {
-        NSLog(@"got an array");
-        self.locations = [NSArray arrayWithObjects:
-                          @"AMNH",
-                          @"CMOM",
-                          @"NYU - Gureckislab",
-                          @"NYU - Rhodeslab",
-                          nil];
+    if([self connected]) {
+        // first insert the form values
+        NSString *url = [[NSString alloc] initWithFormat:@"%@/MakeReservation", @SERVERNAME];
+        NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   self.deviceID, @"deviceID",
+                                   self.processID,@"processID",
+                                   nil];
+        NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues];
+        self.reserveConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.reserveConnection != nil, @"Failure to create URL connection.");
+        // show in the status bar that network activity is starting
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        
+    } else {
+        [self internetUnreachable];
+        return IC_MODEL_FAILURE;
+    }
+    return IC_MODEL_SUCCESS;
+}
+
+- (void)studyFormFinished {
+    if([self connected]) {
+        NSString *url = [[NSString alloc] initWithFormat:@"%@/StudyInfoFinished", @SERVERNAME];
+        NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   [[NSNumber alloc] initWithInt:self.subjectNumber], @"subjectNumber",
+                                   self.subjectID, @"subjectID",
+                                   [NSNumber numberWithBool:self.childStudy], @"childStudy",
+                                   self.currentExperiment, @"currentExperiment",
+                                   self.currentLocation, @"currentLocation",
+                                   nil];
+        NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues];
+        self.studyInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.studyInfoConnection != nil, @"Failure to create URL connection.");
+        // show in the status bar that network activity is starting
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        
+    } else {
+        [self internetUnreachable];
     }
 }
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    NSLog(@"getting response");
+	[self.responseData setLength:0];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    NSLog(@"recieved some data");
+	[self.responseData appendData:data];
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+	// this is the model here, so shouldn't be issuing views, but should pass them up perhaps?
+    NSLog(@"Connection failed: %@", [error description]);
+    //label.text = [NSString stringWithFormat:@"Connection failed: %@", [error description]];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    if (connection == self.reserveConnection) {
+        // do something with the data
+        NSLog(@"got the data");
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        NSString *json_string = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
+        NSLog(@"resulting JSON: %@", json_string);
+        SBJsonParser *parser = [[SBJsonParser alloc] init];
+        id jsonresult = [parser objectWithString:json_string error:nil];
+        if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+            // get the results
+            if ([[jsonresult objectForKey:@"status"] isEqualToString:@"error"]) {
+                NSString *errormsg = [jsonresult objectForKey:@"msg"];
+                [self.interfaceDelegate unrecoverableErrorWithMsg: errormsg];
+            } else {
+                // get the results
+                self.subjectNumber = [[jsonresult objectForKey:@"subjid"] integerValue];
+                self.subjectID = [[NSString alloc] initWithFormat:@"%05d", self.subjectNumber];
+                NSLog(@"%@", self.subjectID);
+                [self.delegate reservationComplete];
+            }
+        } else {
+            // send a bad response error
+            [self badInput];
+        }
+    } 
+    else if (connection == self.studyInfoConnection) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        NSString *json_string = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
+        NSLog(@"resulting JSON: %@", json_string);
+        SBJsonParser *parser = [[SBJsonParser alloc] init];
+        id jsonresult = [parser objectWithString:json_string error:nil];
+        if ([jsonresult isKindOfClass:[NSDictionary class]]) {
+            // get the results
+            if ([[jsonresult objectForKey:@"status"] isEqualToString:@"error"]) {
+                NSString *errormsg = [jsonresult objectForKey:@"msg"];
+                [self.interfaceDelegate unrecoverableErrorWithMsg: errormsg];
+            }
+        } else {
+            // send a bad response error
+            [self badInput];
+        }
+
+    }
+}
+
+- (void)updateSubjectID {
+    if(self.childStudy) {
+        // add a C to the end of the subject number
+        self.subjectID = [[NSString alloc] initWithFormat:@"%05dC", self.subjectNumber];
+    } else {
+        self.subjectID = [[NSString alloc] initWithFormat:@"%05d", self.subjectNumber];
+    }
+}
+
+#pragma mark - error handling
+- (void)internetUnreachable {
+    [self.interfaceDelegate unrecoverableErrorWithMsg:@"Sorry, this application requires a working Internet connection!  Please check your network settings and relaunch the app."];
+}
+
+- (void)serverUnresponsive {
+    [self.interfaceDelegate unrecoverableErrorWithMsg:@"Sorry, unable to contact the server!  Please check your network settings and verify that a suitable iConsent server process is running at the location you expected."];
+}
+
+- (void)badInput {
+    [self.interfaceDelegate unrecoverableErrorWithMsg:@"Sorry, server provided unexpected or poorly formed input.  This may be a bug.  Please quit and try again."];
+}
+
 
 - (NSString *)generateProcessIDWithLength: (int)len
 {
@@ -270,6 +356,40 @@
     
 }
 
+- (NSMutableURLRequest *)makePOSTRequestWithURL:(NSString *)url andKeys:(NSDictionary *)keyValues {
+    
+    // make response get subject number in response and update record
+    NSURL *myURL = [NSURL URLWithString:url];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setURL:myURL];
+    [request setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+    [request setHTTPShouldHandleCookies:NO];
+    [request setTimeoutInterval:30];
+    [request setHTTPMethod:@"POST"];
+    // this is necessary for the mulit-part request
+    NSString *boundary = [self generateRandomStringWithLength:10];
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary];
+    [request setValue:contentType forHTTPHeaderField: @"Content-Type"];
+    // here is the form data
+    NSMutableData *body = [NSMutableData data];
+    
+    
+    for (NSString *param in keyValues) {
+        NSLog(@"%@", param);
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", param] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"%@\r\n", [keyValues objectForKey:param]] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    [body appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setHTTPBody:body];
+    
+    NSString *getLength = [NSString stringWithFormat:@"%d", [body length]];
+    [request setValue:getLength forHTTPHeaderField:@"Content-Length"];
+    
+    return request;
+}
+
 - (BOOL)connected
 {
     Reachability *reachability = [Reachability reachabilityForInternetConnection];
@@ -277,13 +397,5 @@
     return !(networkStatus == NotReachable);
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

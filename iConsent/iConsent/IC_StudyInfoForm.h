@@ -13,7 +13,7 @@
 #import "IC_FormViewController.h"
 #import "DCRoundSwitch.h"
 
-@interface IC_StudyInfoForm : UIViewController <UIPopoverControllerDelegate, IC_OptionSelectDelegate, UIAlertViewDelegate>
+@interface IC_StudyInfoForm : UIViewController <UIPopoverControllerDelegate, IC_ModelDelegate, IC_OptionSelectDelegate, UIAlertViewDelegate>
 
 @property (strong, nonatomic) IC_Model *model;
 @property (strong, nonatomic) IBOutlet UILabel *orgname;

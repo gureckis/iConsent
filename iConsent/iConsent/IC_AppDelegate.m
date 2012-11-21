@@ -20,6 +20,7 @@
     // Override point for customization after application launch.
     self.viewController = [[IC_FormViewController alloc] initWithNibName:@"IC_FormViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
+    self.model.interfaceDelegate = self.viewController;
     [self.window makeKeyAndVisible];
     return YES;
 }
