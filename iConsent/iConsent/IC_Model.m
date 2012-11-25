@@ -167,11 +167,12 @@
     return IC_MODEL_SUCCESS;
 }
 
-- (void)studyFormFinished {
+- (BOOL)studyFormFinished {
     if([self connected]) {
         NSString *url = [[NSString alloc] initWithFormat:@"%@/StudyInfoFinished", @SERVERNAME];
         NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                   [[NSNumber alloc] initWithInt:self.subjectNumber], @"subjectNumber",
+                                   self.deviceID, @"deviceID",
+                                   self.processID,@"processID",
                                    self.subjectID, @"subjectID",
                                    [NSNumber numberWithBool:self.childStudy], @"childStudy",
                                    self.currentExperiment, @"currentExperiment",
@@ -185,6 +186,10 @@
         
     } else {
         [self internetUnreachable];
+        return IC_MODEL_FAILURE;
+    }
+    return IC_MODEL_SUCCESS;
+}
     }
 }
 

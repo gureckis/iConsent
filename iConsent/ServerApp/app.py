@@ -117,22 +117,26 @@ def reserve_new_subject():
         print msg
         return jsonify(status="error, no POST data")
 
+#----------------------------------------------
+# finished with study info
+#----------------------------------------------
 @app.route('/StudyInfoFinished', methods=['POST'])
 def study_info_finished():
     if request.method == 'POST':
-        if request.form.has_key('subjectNumber') \
+        if request.form.has_key('deviceID') and request.form.has_key('processID') \
             and request.form.has_key('subjectID') and request.form.has_key('childStudy') \
             and request.form.has_key('currentExperiment') and request.form.has_key('currentLocation'):
             
-            subjectNumber = request.form['subjectNumber']
+            deviceID = request.form['deviceID']
+            processID = request.form['processID']
             subjectID = request.form['subjectID']
             childStudy = request.form['childStudy']
             currentExperiment = request.form['currentExperiment']
             currentLocation = request.form['currentLocation']
             
-            print subjectNumber, subjectID, childStudy, currentExperiment, currentLocation
+            print subjectID, childStudy, currentExperiment, currentLocation
             # see if this pair already exists
-            person = Participant.query.filter_by(pid=subjectNumber).one()
+            person = Participant.query.filter_by(deviceid=deviceID).filter_by(processid=processID).one()
             if person:
                 person.subjectid = subjectID
                 person.child = childStudy

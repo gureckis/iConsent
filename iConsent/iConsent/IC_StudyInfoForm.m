@@ -35,10 +35,11 @@
        ![self.location.titleLabel.text isEqualToString:@"********************"]
        ) {
         // tell model to update database
-        [self.model studyFormFinished];
-        // return to experiment
-        IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-        [appDelegate.viewController getStudyInfoIsFinished];
+        if ([self.model studyFormFinished]) {
+            // return to control to main controller
+            IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+            [appDelegate.viewController getStudyInfoIsFinished];
+        }
     } else {
         // go on
         NSLog(@"error");
