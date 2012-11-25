@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSURLConnection.h>
 
-#define SERVERNAME "http://192.168.1.2:5003"
+#define SERVERNAME "http://192.168.1.5:5003"
 
 #define IC_MODEL_SUCCESS TRUE
 #define IC_MODEL_FAILURE FALSE
@@ -46,6 +46,7 @@
 @property (nonatomic, strong) NSString *currentExperiment;
 @property (nonatomic, strong) NSString *currentLocation;
 @property BOOL childStudy;
+@property BOOL consent;
 
 - (BOOL)loadServerInfo;
 - (NSString *)getServerName;
@@ -55,9 +56,11 @@
 - (NSString *)getCurrentLocation;
 - (NSString *)getCurrentExperiment;
 - (BOOL)makeAReservation;
+- (BOOL)provideConsentWithSignature:(UIImage *)signature;
 - (void)updateSubjectID;
+- (BOOL)verifyConnected;
 - (void)selectExperiment:(id)optionPicked;
 - (void)selectLocation:(id)optionPicked;
-- (void)studyFormFinished;
+- (BOOL)studyFormFinished;
 - (BOOL)connected;
 @end

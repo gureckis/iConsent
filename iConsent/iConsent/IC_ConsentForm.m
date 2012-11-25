@@ -11,7 +11,6 @@
 @interface IC_ConsentForm()
 @property (strong, nonatomic) UIImage *signatureImage;
 @property BOOL signedComplete;
--(BOOL)connected;
 -(void)loadConsent;
 @end
 
@@ -57,16 +56,17 @@
 {
     NSLog(@"toggling yes/no");
     if(self.yesNoSwitch.on == YES) {
+        self.model.consent = YES;
         // change the size of the consentView to mini size
-        self.consentView.alpha = 0.3;
+        self.consentView.alpha = 0.2;
         [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
             self.interactionSubview.frame = CGRectMake(81, 300, 625, 450);
         } completion:^(BOOL finished) {
-            
             [self.consentView setUserInteractionEnabled:NO];
         }];
         
     } else {
+        self.model.consent = NO;
         // change the size of the consentView to full size
         self.consentView.alpha = 1.0;
         [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
@@ -79,15 +79,6 @@
 
 - (IBAction)clearSignature:(id)sender {
     [self.autograph reset:self];
-}
-
-- (BOOL)connected 
-{
-    /*Reachability *reachability = [Reachability reachabilityForInternetConnection];
-    NetworkStatus networkStatus = [reachability currentReachabilityStatus]; 
-    return !(networkStatus == NotReachable);
-     */
-    return TRUE;
 }
 
 - (void)loadConsent {
@@ -107,22 +98,16 @@
     // set up model
     IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     self.model = appDelegate.model;
-    
+    self.model.delegate = self;
+
     self.experiment_location.adjustsFontSizeToFitWidth = YES;
     self.orgname.adjustsFontSizeToFitWidth = YES;
-
+    self.subjectnumber.adjustsFontSizeToFitWidth = YES;
+    
     // check for internet connection
-    if(![self.model connected]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, this application requires a working Internet connection!  Please check your network settings and relaunch the app." delegate:nil cancelButtonTitle:@"Quit" otherButtonTitles: nil];
-        [alert setDelegate:self];
-        [alert show];
-    } else {
-        self.subjectnumber.text = [self.model getSubjectNumber];
-        self.orgname.text = [self.model getOrganizationName];
-        self.experiment_location.text = [[NSString alloc] initWithFormat:@"%@ (%@)", [self.model getCurrentExperiment],[self.model getCurrentLocation]];
-        //self.experiment_location.text = [self.model getCurrentExperiment];
-
-    }
+    self.subjectnumber.text = self.model.subjectID;
+    self.orgname.text = self.model.organizationName;
+    self.experiment_location.text = [[NSString alloc] initWithFormat:@"%@ (%@)", self.model.currentExperiment, self.model.currentLocation];
     
     // load yes/no switch
     self.yesNoSwitch.onText = @"YES";
@@ -183,26 +168,9 @@
 	//	[autograph setCustomHash:@"DocumentID"];
 	
 	// enable 3-finger swipe to undo.  Default is YES
-	//	[autograph setSwipeToUndoEnabled:NO];
-
-    // hide the stuff by default
-    /*
-    self.signatureBox.hidden = YES;
-    self.autographView.hidden = YES;
-    self.signatureLabel.hidden = YES;
-    self.clearButton.hidden = YES;
-    self.nextButton.hidden = YES;
-    */
-    
+	//	[autograph setSwipeToUndoEnabled:NO];    
     self.signedComplete = NO;
-    
-    // check for internet connection
-    if(![self connected]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Rectangle Game" message:@"Sorry, this application requires a working Internet connection!  Please check your settings and try again." delegate:nil cancelButtonTitle:@"Quit" otherButtonTitles: nil];
-        [alert setDelegate:self];
         
-    }
-    
     
 }
 
@@ -232,23 +200,16 @@
     [self.autograph done:self];
     [self.autograph reset:self];
     if(self.yesNoSwitch.on && self.signedComplete) {
+        // tell model to update database
+        // upload signature and provide consesnt
         // check for internet connection
-        if(![self connected]) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Rectangle Game" message:@"Sorry, this application requires a working Internet connection!  Please check your network settings and relaunch the app." delegate:nil cancelButtonTitle:@"Quit" otherButtonTitles: nil];
-            [alert setDelegate:self];
-        } else {
-            //reserve subject id
-            //[self.model reserveSubjIDWithSignature:self.signatureImage];
-            // go to next form
-            //RGSubjectInfo *vs = [[RGSubjectInfo alloc] initWithNibName:@"RGSubjectInfo" bundle:nil];
-            //RGAppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-            //[appDelegate.transitionController transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+        if ([self.model provideConsentWithSignature:self.signatureImage]) {
+            // return to control to main controller
+            IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+            [appDelegate.viewController getConsentIsFinished];
         }
-        
     } else {
-        // go on
-        NSLog(@"error");
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Rectangle Game" message:@"Sorry, you must agree and sign your name before we start!" delegate:nil cancelButtonTitle:@"Ok!" otherButtonTitles: nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, you must agree and sign your name before we move further!" delegate:nil cancelButtonTitle:@"Ok!" otherButtonTitles: nil];
         [alert show];        
     }
 }
@@ -263,10 +224,8 @@
 }
 
 - (void)webView:(UIWebView *) webView didFailLoadWithError:(NSError *)error 
-{ 
-    NSLog(@"DID FAIL");
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Rectangle Game" message:@"Sorry, this experiment requires a working Internet connection!  Check your internet connection and that the server is working." delegate:nil cancelButtonTitle:@"Try again" otherButtonTitles: @"Quit", nil];
-    [alert setDelegate:self];
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, was unable to load the consent form.  Either the device has lost Internet connection or the server you are trying to contact is down." delegate:self cancelButtonTitle:@"Try again" otherButtonTitles: @"Quit", nil];
     [alert show];        
 
 }
@@ -295,5 +254,9 @@
     UIGraphicsEndImageContext();
 	
 }
+
+#pragma mark - IC_ModelDelegate Functions
+
+
 
 @end

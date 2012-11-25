@@ -20,7 +20,7 @@ from werkzeug import secure_filename
 
 # Database setup
 from db import db_session, init_db
-from models import Participant, Experiment, Location
+from models import *
 from sqlalchemy import or_, and_
 
 # loads configuation
@@ -174,6 +174,50 @@ def study_info_finished():
         msg = "didn't get a POST"
         print msg
         return jsonify(status="error, no POST data")
+
+
+#----------------------------------------------
+# provides consent, officially.  uploads signature and updates database
+#----------------------------------------------
+@app.route('/ProvideConsent', methods=['POST'])
+def provide_consent():
+    if request.method == 'POST':
+        if request.form.has_key('deviceID') and request.form.has_key('processID') and request.files.has_key('signature'):
+            
+            deviceID = request.form['deviceID']
+            processID = request.form['processID']
+            file = request.files['signature']
+            
+            
+            print deviceID, processID
+            # see if this pair already exists
+            person = Participant.query.filter_by(deviceid=deviceID).filter_by(processid=processID).one()
+            if person:
+                person.signaturerecv = True
+                person.status = CONSENTED
+                db_session.commit()
+                if file and allowed_file(file.filename):
+                    filename = str(person.pid)+'.jpg'
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+                msg = "everything seems to have gone ok"
+                print msg
+                return jsonify(status="success", msg=msg)
+            else:
+                # this already exists.  something weird is happening
+                msg = "device/process appears to not exists"
+                print msg
+                db_session.commit()
+                return jsonify(status="error", msg=msg)
+        else:
+            msg = "didn't receive the device and processid"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
+
 
 #----------------------------------------------
 # load the consent form

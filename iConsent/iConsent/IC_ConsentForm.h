@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "IC_AppDelegate.h"
 #import "IC_Model.h"
+#import "IC_FormViewController.h"
 
 #import "T1Autograph.h"
 #import <QuartzCore/QuartzCore.h>
@@ -16,7 +17,7 @@
 #import "DCRoundSwitch.h"
 
 
-@interface IC_ConsentForm : UIViewController <T1AutographDelegate, UIAlertViewDelegate, UIWebViewDelegate>
+@interface IC_ConsentForm : UIViewController <T1AutographDelegate, IC_ModelDelegate, UIAlertViewDelegate, UIWebViewDelegate>
 @property (strong, nonatomic) IC_Model *model;
 
 @property (strong, nonatomic) IBOutlet UILabel *orgname;

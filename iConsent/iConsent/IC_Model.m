@@ -19,6 +19,7 @@
 @interface IC_Model()
 @property (nonatomic, strong) NSURLConnection *reserveConnection;
 @property (nonatomic, strong) NSURLConnection *studyInfoConnection;
+@property (nonatomic, strong) NSURLConnection *consentConnection;
 - (void)internetUnreachable;
 - (void)serverUnresponsive;
 - (void)badInput;
@@ -26,11 +27,13 @@
 - (NSString *)generateProcessIDWithLength:(int)len;
 - (NSString *)generateRandomStringWithLength:(int)len;
 - (NSMutableURLRequest *)makePOSTRequestWithURL:(NSString *)url andKeys:(NSDictionary *)keyValues;
+- (NSMutableURLRequest *)makePOSTRequestWithURL:(NSString *)url andKeys:(NSDictionary *)keyValues andImage:(UIImage *)imgdata;
 @end
 
 @implementation IC_Model
 @synthesize reserveConnection = _reserveConnection;
 @synthesize studyInfoConnection = _studyInfoConnection;
+@synthesize consentConnection = _consentConnection;
 @synthesize experimentOptions = _experimentOptions;
 @synthesize locationOptions = _locationOptions;
 @synthesize deviceID = _deviceID;
@@ -40,6 +43,7 @@
 @synthesize organizationName = _organizationName;
 @synthesize responseData = _responseData;
 @synthesize childStudy = _childStudy;
+@synthesize consent = _consent;
 @synthesize delegate = _delegate;
 @synthesize interfaceDelegate = _interfaceDelegate;
 
@@ -190,7 +194,26 @@
     }
     return IC_MODEL_SUCCESS;
 }
+
+- (BOOL)provideConsentWithSignature:(UIImage *)signature {
+    if([self connected]) {
+        // first insert the form values
+        NSString *url = [[NSString alloc] initWithFormat:@"%@/ProvideConsent", @SERVERNAME];
+        NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   self.deviceID, @"deviceID",
+                                   self.processID,@"processID",
+                                   nil];
+        NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues andImage:signature];
+        self.consentConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.reserveConnection != nil, @"Failure to create URL connection.");
+        // show in the status bar that network activity is starting
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        
+    } else {
+        [self internetUnreachable];
+        return IC_MODEL_FAILURE;
     }
+    return IC_MODEL_SUCCESS;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
@@ -235,7 +258,7 @@
             [self badInput];
         }
     } 
-    else if (connection == self.studyInfoConnection) {
+    else if (connection == self.studyInfoConnection || connection == self.consentConnection) {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSString *json_string = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
         NSLog(@"resulting JSON: %@", json_string);
@@ -378,7 +401,6 @@
     // here is the form data
     NSMutableData *body = [NSMutableData data];
     
-    
     for (NSString *param in keyValues) {
         NSLog(@"%@", param);
         [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -395,11 +417,66 @@
     return request;
 }
 
+
+- (NSMutableURLRequest *)makePOSTRequestWithURL:(NSString *)url andKeys:(NSDictionary *)keyValues andImage:(UIImage *)imgdata {
+    
+    // make response get subject number in response and update record
+    NSURL *myURL = [NSURL URLWithString:url];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setURL:myURL];
+    [request setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+    [request setHTTPShouldHandleCookies:NO];
+    [request setTimeoutInterval:30];
+    [request setHTTPMethod:@"POST"];
+    // this is necessary for the mulit-part request
+    NSString *boundary = [self generateRandomStringWithLength:10];
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary];
+    [request setValue:contentType forHTTPHeaderField: @"Content-Type"];
+    // here is the form data
+    NSMutableData *body = [NSMutableData data];
+    
+    // add key values pairs
+    for (NSString *param in keyValues) {
+        NSLog(@"%@", param);
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", param] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"%@\r\n", [keyValues objectForKey:param]] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    // add image data
+    NSData *imageData = UIImageJPEGRepresentation(imgdata, 1.0);
+    if (imageData) {
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"Content-Disposition: form-data; name=\"signature\"; filename=\"signature.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"Content-Type: image/jpeg\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:imageData];
+        [body appendData:[[NSString stringWithFormat:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+
+    
+    [body appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setHTTPBody:body];
+    
+    NSString *getLength = [NSString stringWithFormat:@"%d", [body length]];
+    [request setValue:getLength forHTTPHeaderField:@"Content-Length"];
+    
+    return request;
+}
+
 - (BOOL)connected
 {
     Reachability *reachability = [Reachability reachabilityForInternetConnection];
     NetworkStatus networkStatus = [reachability currentReachabilityStatus];
     return !(networkStatus == NotReachable);
+}
+
+- (BOOL)verifyConnected
+{
+    BOOL connectQ = [self connected];
+    if (!connectQ) {
+        [self internetUnreachable];
+    }
+    return connectQ;
 }
 
 
