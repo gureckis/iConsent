@@ -181,4 +181,13 @@
     [alert show];
 }
 
+#pragma mark - Alert view delegates
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Quit"]) {
+        exit(0);
+    }
+}
+
 @end

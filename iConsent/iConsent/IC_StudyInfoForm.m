@@ -62,7 +62,6 @@
     CGRect popoverRect = [self.view convertRect:[sender frame] toView:[sender superview]];
     self.experimentPopoverController.popoverContentSize= CGSizeMake(350, 44*[self.experimentOptions count]);
     [self.experimentPopoverController presentPopoverFromRect:popoverRect inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    
 }
 
 - (IBAction)showLocations:(id)sender {
@@ -78,7 +77,6 @@
     CGRect popoverRect = [self.view convertRect:[sender frame] toView:[sender superview]];
     self.locationPopoverController.popoverContentSize= CGSizeMake(350, 44*[self.locationOptions count]);
     [self.locationPopoverController presentPopoverFromRect:popoverRect inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    
 }
 
 
@@ -130,6 +128,15 @@
     self.subjectnumber.text = self.model.subjectID;
 }
 
+#pragma mark - Alert view delegates
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Quit"]) {
+        exit(0);
+    }
+}
+
 #pragma mark - Popup stuff
 
 //---called when the user clicks outside the popover view---
@@ -179,7 +186,6 @@
     [self.childSwitch addTarget:self action:@selector(childToggled:) forControlEvents:UIControlEventValueChanged];
     self.childSwitch.on = NO;
     
-    
     // load options from the server
     if ([self.model loadServerInfo]) {
         NSLog(@"couldn't load server");
@@ -187,13 +193,6 @@
         [self.model makeAReservation];
     }
     
-}
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
-{
-    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:@"Quit"]) {
-        exit(0);
-    }
 }
 
 - (void)didReceiveMemoryWarning
