@@ -1,8 +1,8 @@
-[Database Parameter]
+[General Info]
+org_name:  New York University
 
-; Example MySQL url:  mysql://user:password@domain:port/dbname
-; MySQL url using MAMP:  mysql://mturk@localhost/mturk?unix_socket=/Applications/MAMP/tmp/mysql/mysql.sock
 
+[Database Parameters]
 database_url:  sqlite:///participants.db
 
 
@@ -14,7 +14,7 @@ cutoff_time: 30         ; Time in minutes when we assume a subject gave up
 support_IE: true        ; Whether to support Internet Explorer
 
 logfile = server.log
-loglevel = 2 ; 0=DEBUG, 1=INFO, 2=WARNING, 3=ERROR, 4=CRITICAL
+loglevel = 2            ; 0=DEBUG, 1=INFO, 2=WARNING, 3=ERROR, 4=CRITICAL
 
 debug: true             ; NEVER leave this on when exposing the server to the public.
 
@@ -27,3 +27,15 @@ code_version: 1.0
 
 num_conds: 1            ; Number of conditions of interest
 num_counters: 1         ; Number of counterbalance alternatives
+
+
+[Form Configuration]
+gender_options: ["Male", "Female"]
+
+race_ethnics_options: ["American Indian or Alaska Native", "Asian", "Black or African American", "Hispanic or Latino", "Native Hawaiian or Other Pacific Islander", "White"]
+
+language_options: ["English", "Spanish", "Chinese", "Russian", "Korean", "Italian", "French/French Creole", "Hebrew", "Other"]
+
+sibling_options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11+"]
+
+birth_order_options: ["Only Child", "Youngest", "Middle", "Oldest"]

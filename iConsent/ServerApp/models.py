@@ -12,10 +12,11 @@ EXPERIMENT_TABLENAME = config.get('Database Parameters', 'experiment_table_name'
 # possible statuses for a participant in the database
 RESERVED = 0
 CONSENTED = 1
-STARTED = 2
-COMPLETED = 3
-DEBRIEFED = 4
-QUITEARLY = 5
+INFORECVD = 2
+STARTED = 3
+COMPLETED = 4
+DEBRIEFED = 5
+QUITEARLY = 6
 
 ###########################################################
 # the model
@@ -58,6 +59,11 @@ class Participant(Base):
     loc = relationship('Location', lazy='joined', uselist=False, primaryjoin=locid==Location.locid)
     subjectid = Column(String(10))
     child = Column(Boolean)
+    age_in_months = Column(Integer)
+    age_in_years = Column(Integer)
+    gender = Column(String(1))
+    name = Column(String(256))
+    participantinfo = Column(Text)
     
     def __init__(self, ipaddress, deviceid, processid):
         self.ipaddress = ipaddress
@@ -67,12 +73,7 @@ class Participant(Base):
         self.reservationtimestamp = datetime.datetime.now()
     
     def __repr__(self):
-        return '<Band %r,%r, %r>' % (self.bandname, self.price, self.nowned)
-# # create parent, append a child via association
-# p = Parent()
-# a = Association(extra_data="some data")
-# a.child = Child()
-# p.children.append(a)
+        return '<Participant %r,%r, %r>' % (self.status, self.processid, self.status)
 
 
 # how to serialize (i.e., JSONify) an obect

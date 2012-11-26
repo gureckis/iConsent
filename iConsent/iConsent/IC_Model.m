@@ -18,8 +18,7 @@
 
 @interface IC_Model()
 @property (nonatomic, strong) NSURLConnection *reserveConnection;
-@property (nonatomic, strong) NSURLConnection *studyInfoConnection;
-@property (nonatomic, strong) NSURLConnection *consentConnection;
+@property (nonatomic, strong) NSURLConnection *sendConnection;
 - (void)internetUnreachable;
 - (void)serverUnresponsive;
 - (void)badInput;
@@ -32,10 +31,14 @@
 
 @implementation IC_Model
 @synthesize reserveConnection = _reserveConnection;
-@synthesize studyInfoConnection = _studyInfoConnection;
-@synthesize consentConnection = _consentConnection;
+@synthesize sendConnection = _sendConnection;
 @synthesize experimentOptions = _experimentOptions;
 @synthesize locationOptions = _locationOptions;
+@synthesize genderOptions = _genderOptions;
+@synthesize ethnicOptions = _ethnicOptions;
+@synthesize languageOptions = _languageOptions;
+@synthesize siblingOptions = _siblingOptions;
+@synthesize birthorderOptions = _birthorderOptions;
 @synthesize deviceID = _deviceID;
 @synthesize processID = _processID;
 @synthesize subjectNumber = _subjectNumber;
@@ -66,8 +69,6 @@
     return self;
 }
 
-
-
 - (NSString *)getServerName {
     return @SERVERNAME;
 }
@@ -75,7 +76,6 @@
 - (NSString *)getConsentURL {
     return [[NSString alloc] initWithFormat:@"%@/consent", @SERVERNAME];
 }
-
 
 - (NSString *)getSubjectID {
     return self.subjectID;
@@ -128,6 +128,12 @@
                     self.organizationName = [jsonresult objectForKey:@"org_name"];
                     self.experimentOptions = [jsonresult objectForKey:@"experiments"];
                     self.locationOptions = [jsonresult objectForKey:@"locations"];
+                    self.genderOptions = [jsonresult objectForKey:@"gender_options"];
+                    self.ethnicOptions = [jsonresult objectForKey:@"race_ethnics_options"];
+                    self.languageOptions = [jsonresult objectForKey:@"language_options"];
+                    // primary language options is the same as languageOptions
+                    self.siblingOptions = [jsonresult objectForKey:@"sibling_options"];
+                    self.birthorderOptions = [jsonresult objectForKey:@"birth_order_options"];
                 }
             } else {
                 // send a bad response error
@@ -183,8 +189,8 @@
                                    self.currentLocation, @"currentLocation",
                                    nil];
         NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues];
-        self.studyInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-        NSAssert(self.studyInfoConnection != nil, @"Failure to create URL connection.");
+        self.sendConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.sendConnection != nil, @"Failure to create URL connection.");
         // show in the status bar that network activity is starting
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
         
@@ -204,7 +210,7 @@
                                    self.processID,@"processID",
                                    nil];
         NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues andImage:signature];
-        self.consentConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        self.sendConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
         NSAssert(self.reserveConnection != nil, @"Failure to create URL connection.");
         // show in the status bar that network activity is starting
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -214,6 +220,28 @@
         return IC_MODEL_FAILURE;
     }
     return IC_MODEL_SUCCESS;
+}
+
+- (BOOL)submitParticipantInfo:(NSString *)jsonSummary {
+    // there might be a couple actual database field we want to deal with here
+    if([self connected]) {
+        NSString *url = [[NSString alloc] initWithFormat:@"%@/ParticipantInfoFinished", @SERVERNAME];
+        NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   self.deviceID, @"deviceID",
+                                   self.processID,@"processID",
+                                   jsonSummary, @"participantInfo",
+                                   nil];
+        NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues];
+        self.sendConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.sendConnection != nil, @"Failure to create URL connection.");
+        // show in the status bar that network activity is starting
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    } else {
+        [self internetUnreachable];
+        return IC_MODEL_FAILURE;
+    }
+    return IC_MODEL_SUCCESS;
+    
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
@@ -258,7 +286,7 @@
             [self badInput];
         }
     } 
-    else if (connection == self.studyInfoConnection || connection == self.consentConnection) {
+    else if (connection == self.sendConnection) {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSString *json_string = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
         NSLog(@"resulting JSON: %@", json_string);

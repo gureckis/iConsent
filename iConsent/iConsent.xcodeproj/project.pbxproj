@@ -61,6 +61,10 @@
 		6463D07A162F1AD4000A8D3B /* IC_FormViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6463D078162F1AD4000A8D3B /* IC_FormViewController.xib */; };
 		64B83C1B1640A9E2002993BF /* IC_Model.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B83C1A1640A9E2002993BF /* IC_Model.m */; };
 		64BBDD3A1630964500CFF691 /* placeholder.txt in Resources */ = {isa = PBXBuildFile; fileRef = 64BBDD391630964500CFF691 /* placeholder.txt */; };
+		64D692E916631456004BA829 /* IC_MultiOptionSelect.m in Sources */ = {isa = PBXBuildFile; fileRef = 64D692E716631456004BA829 /* IC_MultiOptionSelect.m */; };
+		64D692EA16631456004BA829 /* IC_MultiOptionSelect.xib in Resources */ = {isa = PBXBuildFile; fileRef = 64D692E816631456004BA829 /* IC_MultiOptionSelect.xib */; };
+		64D692ED16632214004BA829 /* checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EB16631F45004BA829 /* checkmark.png */; };
+		64D692EE16632217004BA829 /* emptymark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EC16631F50004BA829 /* emptymark.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -153,6 +157,11 @@
 		64BBDD391630964500CFF691 /* placeholder.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = placeholder.txt; sourceTree = "<group>"; };
 		64BBDD3B1630AC6D00CFF691 /* config.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = config.py; sourceTree = "<group>"; };
 		64BBDD3C1630ACC500CFF691 /* config.txt.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = config.txt.example; sourceTree = "<group>"; };
+		64D692E616631456004BA829 /* IC_MultiOptionSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_MultiOptionSelect.h; sourceTree = "<group>"; };
+		64D692E716631456004BA829 /* IC_MultiOptionSelect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_MultiOptionSelect.m; sourceTree = "<group>"; };
+		64D692E816631456004BA829 /* IC_MultiOptionSelect.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_MultiOptionSelect.xib; sourceTree = "<group>"; };
+		64D692EB16631F45004BA829 /* checkmark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkmark.png; sourceTree = "<group>"; };
+		64D692EC16631F50004BA829 /* emptymark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emptymark.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -255,6 +264,8 @@
 		645BB818164D587800BA3580 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				64D692EC16631F50004BA829 /* emptymark.png */,
+				64D692EB16631F45004BA829 /* checkmark.png */,
 				64357C9C164DB5BD00D5B48B /* downarrow.png */,
 				64357C9A164DB54800D5B48B /* signaturebox.png */,
 				64357C98164DB52E00D5B48B /* clearsignature.png */,
@@ -322,6 +333,9 @@
 				645BB813164CCA0800BA3580 /* IC_OptionSelect.h */,
 				645BB814164CCA0800BA3580 /* IC_OptionSelect.m */,
 				645BB815164CCA0800BA3580 /* IC_OptionSelect.xib */,
+				64D692E616631456004BA829 /* IC_MultiOptionSelect.h */,
+				64D692E716631456004BA829 /* IC_MultiOptionSelect.m */,
+				64D692E816631456004BA829 /* IC_MultiOptionSelect.xib */,
 			);
 			path = iConsent;
 			sourceTree = "<group>";
@@ -462,6 +476,9 @@
 				642B70421658959B00907FEA /* IC_SubjectInfoFormChild.xib in Resources */,
 				640C8C85165AA211007EC8D8 /* models.py in Resources */,
 				640C8C88165AAA5B007EC8D8 /* db.py in Resources */,
+				64D692EA16631456004BA829 /* IC_MultiOptionSelect.xib in Resources */,
+				64D692ED16632214004BA829 /* checkmark.png in Resources */,
+				64D692EE16632217004BA829 /* emptymark.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -497,6 +514,7 @@
 				642B703B1656F35B00907FEA /* SBJsonUTF8Stream.m in Sources */,
 				642B703C1656F35B00907FEA /* SBJsonWriter.m in Sources */,
 				642B70411658959B00907FEA /* IC_SubjectInfoFormChild.m in Sources */,
+				64D692E916631456004BA829 /* IC_MultiOptionSelect.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

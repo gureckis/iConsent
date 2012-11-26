@@ -25,6 +25,7 @@ from sqlalchemy import or_, and_
 
 # loads configuation
 from config import config
+import json
 
 UPLOAD_FOLDER = config.get('Database Parameters', 'upload_folder')
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
@@ -71,8 +72,14 @@ def get_server_info():
     experiments = Experiment.query.filter_by(active=True).all()
     myexps = [i.expname for i in experiments]
     db_session.commit()
-    return jsonify(org_name=org, locations=mylocs, experiments=myexps)
-
+    return jsonify(org_name=org, \
+                   locations=mylocs, \
+                   experiments=myexps, \
+                   gender_options = json.loads(config.get('Form Configuration','gender_options')), \
+                   race_ethnics_options = json.loads(config.get('Form Configuration','race_ethnics_options')), \
+                   language_options = json.loads(config.get('Form Configuration','language_options')), \
+                   sibling_options = json.loads(config.get('Form Configuration', 'sibling_options')), \
+                   birth_order_options = json.loads(config.get('Form Configuration', 'birth_order_options')))
 
 ###########################################################
 # take action!
@@ -218,6 +225,42 @@ def provide_consent():
         print msg
         return jsonify(status="error, no POST data")
 
+#----------------------------------------------
+# provides consent, officially.  uploads signature and updates database
+#----------------------------------------------
+@app.route('/ParticipantInfoFinished', methods=['POST'])
+def participant_info_finished():
+    if request.method == 'POST':
+        if request.form.has_key('deviceID') and request.form.has_key('processID') and request.form.has_key('participantInfo'):
+            
+            deviceID = request.form['deviceID']
+            processID = request.form['processID']
+            participantInfoJSON = request.form['participantInfo']
+            
+            print deviceID, processID
+            # see if this pair already exists
+            person = Participant.query.filter_by(deviceid=deviceID).filter_by(processid=processID).one()
+            if person:
+                person.participantinfo = participantInfoJSON
+                person.status = INFORECVD
+                db_session.commit()
+                msg = "everything seems to have gone ok"
+                print msg
+                return jsonify(status="success", msg=msg)
+            else:
+                # this already exists.  something weird is happening
+                msg = "device/process appears to not exists"
+                print msg
+                db_session.commit()
+                return jsonify(status="error", msg=msg)
+        else:
+            msg = "didn't receive the device and processid"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
 
 #----------------------------------------------
 # load the consent form

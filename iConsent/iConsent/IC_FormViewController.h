@@ -12,8 +12,9 @@
 #import "IC_Model.h"
 #import "IC_StudyInfoForm.h"
 #import "IC_ConsentForm.h"
+#import "IC_SubjectInfoFormChild.h"
 
-@interface IC_FormViewController : UIViewController <IC_ModelInterfaceDelegate>
+@interface IC_FormViewController : UIViewController <IC_ModelInterfaceDelegate, UIAlertViewDelegate>
 @property (nonatomic, strong) UIView *containerView;
 @property (nonatomic, strong) UIViewController *viewController;
 @property (nonatomic, strong) IC_Model *model;
@@ -39,10 +40,10 @@
 - (void)getParticipantInfo;
 - (void)getParticipantInfoIsFinished;
 
-// get a copy
-#define GET_EMAIL 3
-- (void)getEmailACopy;
-- (void)getEmailACopyIsFinished;
+// do experiment
+#define DO_EXPERIMENT 3
+- (void)doExperiment;
+- (void)doExperimentIsFinished;
 
 // thank you
 #define THANK_YOU 4

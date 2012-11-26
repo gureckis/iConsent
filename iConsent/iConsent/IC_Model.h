@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSURLConnection.h>
 
-#define SERVERNAME "http://192.168.1.5:5003"
+#define SERVERNAME "http://0.0.0.0:5003"
 
 #define IC_MODEL_SUCCESS TRUE
 #define IC_MODEL_FAILURE FALSE
@@ -37,6 +37,11 @@
 @property (nonatomic, assign) id <IC_ModelInterfaceDelegate> interfaceDelegate;
 @property (nonatomic, strong) NSArray *experimentOptions;
 @property (nonatomic, strong) NSArray *locationOptions;
+@property (nonatomic, strong) NSArray *genderOptions;
+@property (nonatomic, strong) NSArray *ethnicOptions;
+@property (nonatomic, strong) NSArray *languageOptions;
+@property (nonatomic, strong) NSArray *siblingOptions;
+@property (nonatomic, strong) NSArray *birthorderOptions;
 @property (nonatomic, strong) NSMutableData *responseData;
 @property (nonatomic, strong) NSString *deviceID; // mac address
 @property (nonatomic, strong) NSString *processID; // processID
@@ -62,5 +67,6 @@
 - (void)selectExperiment:(id)optionPicked;
 - (void)selectLocation:(id)optionPicked;
 - (BOOL)studyFormFinished;
+- (BOOL)submitParticipantInfo:(NSString *)jsonSummary;
 - (BOOL)connected;
 @end

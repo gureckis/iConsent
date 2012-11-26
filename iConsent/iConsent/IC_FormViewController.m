@@ -33,8 +33,8 @@
         case PARTICIPANT_INFO:
             [self getParticipantInfo];
             break;
-        case GET_EMAIL:
-            [self getEmailACopy];
+        case DO_EXPERIMENT:
+            [self doExperiment];
             break;
         case THANK_YOU:
             [self getThankYou];
@@ -51,7 +51,6 @@
     
     IC_StudyInfoForm *vs = [[IC_StudyInfoForm alloc] initWithNibName:@"IC_StudyInfoForm" bundle:nil];
     [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
-    
 }
 
 - (void)getStudyInfoIsFinished {
@@ -66,7 +65,6 @@
     
     IC_ConsentForm *vs = [[IC_ConsentForm alloc] initWithNibName:@"IC_ConsentForm" bundle:nil];
     [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
-    
 }
 
 - (void)getConsentIsFinished {
@@ -76,20 +74,32 @@
 }
 
 - (void)getParticipantInfo {
+    // first set allowable orientations
+    self.orientations = UIInterfaceOrientationPortrait;
     
+    if (self.model.childStudy) {
+        // this is a child study, show appropriate form
+        IC_SubjectInfoFormChild *vs = [[IC_SubjectInfoFormChild alloc] initWithNibName:@"IC_SubjectInfoFormChild" bundle:nil];
+        [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+    } else {
+        // this is and adult study (coming soon)
+        NSLog(@"Adult study not implemented yet, using child study form.");
+        IC_SubjectInfoFormChild *vs = [[IC_SubjectInfoFormChild alloc] initWithNibName:@"IC_SubjectInfoFormChild" bundle:nil];
+        [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+    }
 }
 
 - (void)getParticipantInfoIsFinished {
     NSLog(@"done with participant info");
-    self.state = GET_EMAIL;
+    self.state = DO_EXPERIMENT;
     [self updateState];
 }
 
-- (void)getEmailACopy {
+- (void)doExperiment {
     
 }
 
-- (void)getEmailACopyIsFinished {
+- (void)doExperimentIsFinished {
     // this should "end" this sequence of views
 }
 
@@ -130,8 +140,7 @@
     IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     self.model = appDelegate.model;
     
-    //[self getSubjInfo];
-    self.state = STUDY_INFO;
+    self.state = STUDY_INFO; // PARTICIPANT_INFO; //
     [self updateState];
     NSLog(@"loaded up FormVC");
     // self.state = INSTRUCTIONS_1;
