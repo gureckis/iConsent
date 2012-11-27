@@ -49,6 +49,7 @@
 @synthesize consent = _consent;
 @synthesize delegate = _delegate;
 @synthesize interfaceDelegate = _interfaceDelegate;
+@synthesize emailAddress = _emailAddress;
 
 - (id)init {
     self = [super init];

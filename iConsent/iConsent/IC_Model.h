@@ -50,6 +50,7 @@
 @property (nonatomic, strong) NSString *organizationName;
 @property (nonatomic, strong) NSString *currentExperiment;
 @property (nonatomic, strong) NSString *currentLocation;
+@property (nonatomic, strong) NSString *emailAddress;
 @property BOOL childStudy;
 @property BOOL consent;
 

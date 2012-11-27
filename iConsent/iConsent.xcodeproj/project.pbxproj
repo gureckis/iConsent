@@ -65,6 +65,7 @@
 		64D692EA16631456004BA829 /* IC_MultiOptionSelect.xib in Resources */ = {isa = PBXBuildFile; fileRef = 64D692E816631456004BA829 /* IC_MultiOptionSelect.xib */; };
 		64D692ED16632214004BA829 /* checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EB16631F45004BA829 /* checkmark.png */; };
 		64D692EE16632217004BA829 /* emptymark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EC16631F50004BA829 /* emptymark.png */; };
+		64D692F41664382C004BA829 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64D692F31664382C004BA829 /* MessageUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -162,6 +163,7 @@
 		64D692E816631456004BA829 /* IC_MultiOptionSelect.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_MultiOptionSelect.xib; sourceTree = "<group>"; };
 		64D692EB16631F45004BA829 /* checkmark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkmark.png; sourceTree = "<group>"; };
 		64D692EC16631F50004BA829 /* emptymark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emptymark.png; sourceTree = "<group>"; };
+		64D692F31664382C004BA829 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64D692F41664382C004BA829 /* MessageUI.framework in Frameworks */,
 				642B6FE51656E56800907FEA /* SystemConfiguration.framework in Frameworks */,
 				64357C89164DAA9B00D5B48B /* QuartzCore.framework in Frameworks */,
 				6463D05E162F1AD4000A8D3B /* UIKit.framework in Frameworks */,
@@ -278,6 +281,7 @@
 		6463D04E162F1AD4000A8D3B = {
 			isa = PBXGroup;
 			children = (
+				64D692F31664382C004BA829 /* MessageUI.framework */,
 				642B6FE41656E56800907FEA /* SystemConfiguration.framework */,
 				64357C88164DAA9B00D5B48B /* QuartzCore.framework */,
 				64BBDD28163095F100CFF691 /* ServerApp */,

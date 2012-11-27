@@ -12,6 +12,8 @@
 @property (strong, nonatomic) UIImage *signatureImage;
 @property BOOL signedComplete;
 -(void)loadConsent;
+- (BOOL)isValidEmail:(NSString *)email;
+- (void)emailConsent;
 @end
 
 @implementation IC_ConsentForm
@@ -59,6 +61,9 @@
         self.model.consent = YES;
         // change the size of the consentView to mini size
         self.consentView.alpha = 0.2;
+        self.orgname.alpha = 0.2;
+        self.subjectnumber.alpha = 0.2;
+        self.experiment_location.alpha = 0.2;
         [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
             self.interactionSubview.frame = CGRectMake(81, 300, 625, 450);
         } completion:^(BOOL finished) {
@@ -69,6 +74,9 @@
         self.model.consent = NO;
         // change the size of the consentView to full size
         self.consentView.alpha = 1.0;
+        self.orgname.alpha = 1.0;
+        self.subjectnumber.alpha = 1.0;
+        self.experiment_location.alpha = 1.0;
         [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
             self.interactionSubview.frame = CGRectMake(81, 904, 625, 450);
         } completion:^(BOOL finished) {
@@ -114,6 +122,12 @@
     self.yesNoSwitch.offText = @"NO";
     [self.yesNoSwitch addTarget:self action:@selector(yesNoToggled:) forControlEvents:UIControlEventValueChanged];
     self.yesNoSwitch.on = NO;
+
+    self.emailSubview.autoresizesSubviews = YES;
+    self.emailSubview.autoresizingMask = resizeMask;
+    [self.view addSubview:self.emailSubview];
+    self.emailSubview.frame = CGRectMake(1024+625, 300, 625, 450);
+
 
     self.interactionSubview.autoresizesSubviews = YES;
     self.interactionSubview.autoresizingMask = resizeMask;
@@ -194,8 +208,7 @@
 
 }
 
-
-- (IBAction)goToSubjInfo:(id)sender {
+- (IBAction)getEmail:(id)sender {
     // first check if all the fields are ok.
     [self.autograph done:self];
     [self.autograph reset:self];
@@ -204,13 +217,81 @@
         // upload signature and provide consesnt
         // check for internet connection
         if ([self.model provideConsentWithSignature:self.signatureImage]) {
-            // return to control to main controller
-            IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-            [appDelegate.viewController getConsentIsFinished];
+            [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
+                self.interactionSubview.frame = CGRectMake(-625, 300, 625, 450);
+                self.emailSubview.frame = CGRectMake(81, 300, 625, 450);
+            } completion:^(BOOL finished) {
+                [self.interactionSubview setUserInteractionEnabled:NO];
+            }];
         }
     } else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, you must agree and sign your name before we move further!" delegate:nil cancelButtonTitle:@"Ok!" otherButtonTitles: nil];
-        [alert show];        
+        [alert show];
+    }
+    
+}
+
+- (BOOL)isValidEmail:(NSString *)email {
+    BOOL stricterFilter = YES; // Discussion http://blog.logichigh.com/2010/09/02/validating-an-e-mail-address/
+    NSString *stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+    NSString *laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
+    NSString *emailRegex = stricterFilter ? stricterFilterString : laxString;
+    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+    return [emailTest evaluateWithObject:email];
+}
+
+- (void)emailConsent {
+    if ([MFMailComposeViewController canSendMail])
+    {
+        MFMailComposeViewController *mailer = [[MFMailComposeViewController alloc] init];
+        mailer.mailComposeDelegate = self;
+        NSString *subject = [[NSString alloc] initWithFormat:@"[%@]: Informed consent from experiment today at %@", [self.model getOrganizationName], [self.model getCurrentLocation], nil];
+        [mailer setSubject:subject];
+        
+        NSArray *toRecipients = [NSArray arrayWithObjects:self.model.emailAddress, nil];
+        [mailer setToRecipients:toRecipients];
+        
+        NSString *emailBody = [self.consentView
+                               stringByEvaluatingJavaScriptFromString:@"document.documentElement.innerHTML"];
+        [mailer setMessageBody:emailBody isHTML:YES];
+        
+        mailer.modalPresentationStyle = UIModalPresentationFormSheet;
+        [self presentViewController:mailer animated:YES completion:nil];
+    }
+    else
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failure"
+                                                        message:@"Your device doesn't support email!"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }
+    // email data here
+    // when button is pressed pop-up email modal view pre-populated with model datafile stuff.
+    // set email address to the one by default.
+    
+}
+
+
+- (IBAction)goToSubjInfo:(id)sender {
+    // via http://stackoverflow.com/questions/3139619/check-that-an-email-address-is-valid-on-ios
+    // first check if all the fields are ok.
+    NSLog(@"%@",self.emailAddress.text);
+    if(self.emailAddress.text == nil || [self.emailAddress.text isEqualToString: @""] || [self.emailAddress.text isEqualToString: @"*********************"]) {
+        // return to control to main controller
+        IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        [appDelegate.viewController getConsentIsFinished];
+    } else {
+        if([self isValidEmail:self.emailAddress.text]) {
+            NSLog(@"got a valid email");
+            self.model.emailAddress = self.emailAddress.text;
+            [self emailConsent];
+        } else {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, the provided email address appears invalid.  Please double check." delegate:nil cancelButtonTitle:@"Ok!" otherButtonTitles: nil];
+            [alert show];
+        }
+
     }
 }
 
@@ -257,6 +338,39 @@
 
 #pragma mark - IC_ModelDelegate Functions
 
+#pragma mark - MFMailComposeViewController Delegate
 
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+{
+    IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"iConsent" message:@"Sorry, was unable send email.  Please check that this device is able to send and receive email, re-enter your address, and try again." delegate:self cancelButtonTitle:@"Ok!" otherButtonTitles: nil];
+    switch (result)
+    {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail cancelled: you cancelled the operation and no email message was queued.");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail saved: you saved the email message in the drafts folder.");
+            // return to control to main controller
+            [appDelegate.viewController getConsentIsFinished];
+            break;
+        case MFMailComposeResultSent:
+            // wait until the message send to move on.
+            NSLog(@"Mail send: the email message is queued in the outbox. It is ready to send.");
+            // return to control to main controller
+            [appDelegate.viewController getConsentIsFinished];
+            break;
+        case MFMailComposeResultFailed:
+            [alert show];
+            break;
+        default:
+            NSLog(@"Mail not sent.");
+            break;
+    }
+    
+    // Remove the mail view
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+}
 
 @end
