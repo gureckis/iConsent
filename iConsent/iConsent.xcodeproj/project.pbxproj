@@ -42,6 +42,8 @@
 		64357CA5164DB76100D5B48B /* autograph_x.png in Resources */ = {isa = PBXBuildFile; fileRef = 64357CA0164DB76100D5B48B /* autograph_x.png */; };
 		64357CA6164DB76100D5B48B /* t1_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 64357CA1164DB76100D5B48B /* t1_logo.png */; };
 		64357CA7164DB76100D5B48B /* libT1Autograph.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 64357CA2164DB76100D5B48B /* libT1Autograph.a */; };
+		644E5B86175F006B002ABA52 /* IC_Notes.m in Sources */ = {isa = PBXBuildFile; fileRef = 644E5B84175F006B002ABA52 /* IC_Notes.m */; };
+		644E5B87175F006B002ABA52 /* IC_Notes.xib in Resources */ = {isa = PBXBuildFile; fileRef = 644E5B85175F006B002ABA52 /* IC_Notes.xib */; };
 		645BB80E164C5BBF00BA3580 /* IC_StudyInfoForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 645BB80C164C5BBF00BA3580 /* IC_StudyInfoForm.m */; };
 		645BB80F164C5BBF00BA3580 /* IC_StudyInfoForm.xib in Resources */ = {isa = PBXBuildFile; fileRef = 645BB80D164C5BBF00BA3580 /* IC_StudyInfoForm.xib */; };
 		645BB816164CCA0800BA3580 /* IC_OptionSelect.m in Sources */ = {isa = PBXBuildFile; fileRef = 645BB814164CCA0800BA3580 /* IC_OptionSelect.m */; };
@@ -66,6 +68,8 @@
 		64D692ED16632214004BA829 /* checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EB16631F45004BA829 /* checkmark.png */; };
 		64D692EE16632217004BA829 /* emptymark.png in Resources */ = {isa = PBXBuildFile; fileRef = 64D692EC16631F50004BA829 /* emptymark.png */; };
 		64D692F41664382C004BA829 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64D692F31664382C004BA829 /* MessageUI.framework */; };
+		64E2A3CE170A452C0007BDF2 /* IC_Experiment.m in Sources */ = {isa = PBXBuildFile; fileRef = 64E2A3CC170A452B0007BDF2 /* IC_Experiment.m */; };
+		64E2A3CF170A452C0007BDF2 /* IC_Experiment.xib in Resources */ = {isa = PBXBuildFile; fileRef = 64E2A3CD170A452B0007BDF2 /* IC_Experiment.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -127,6 +131,9 @@
 		64357CA2164DB76100D5B48B /* libT1Autograph.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libT1Autograph.a; sourceTree = "<group>"; };
 		64357CA3164DB76100D5B48B /* T1Autograph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = T1Autograph.h; sourceTree = "<group>"; };
 		64357CA4164DB76100D5B48B /* T1Signature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = T1Signature.h; sourceTree = "<group>"; };
+		644E5B83175F006B002ABA52 /* IC_Notes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_Notes.h; sourceTree = "<group>"; };
+		644E5B84175F006B002ABA52 /* IC_Notes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_Notes.m; sourceTree = "<group>"; };
+		644E5B85175F006B002ABA52 /* IC_Notes.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_Notes.xib; sourceTree = "<group>"; };
 		645BB80B164C5BBF00BA3580 /* IC_StudyInfoForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_StudyInfoForm.h; sourceTree = "<group>"; };
 		645BB80C164C5BBF00BA3580 /* IC_StudyInfoForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_StudyInfoForm.m; sourceTree = "<group>"; };
 		645BB80D164C5BBF00BA3580 /* IC_StudyInfoForm.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_StudyInfoForm.xib; sourceTree = "<group>"; };
@@ -164,6 +171,9 @@
 		64D692EB16631F45004BA829 /* checkmark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkmark.png; sourceTree = "<group>"; };
 		64D692EC16631F50004BA829 /* emptymark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emptymark.png; sourceTree = "<group>"; };
 		64D692F31664382C004BA829 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		64E2A3CB170A452B0007BDF2 /* IC_Experiment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_Experiment.h; sourceTree = "<group>"; };
+		64E2A3CC170A452B0007BDF2 /* IC_Experiment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_Experiment.m; sourceTree = "<group>"; };
+		64E2A3CD170A452B0007BDF2 /* IC_Experiment.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IC_Experiment.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -333,6 +343,12 @@
 				642B703E1658959A00907FEA /* IC_SubjectInfoFormChild.h */,
 				642B703F1658959A00907FEA /* IC_SubjectInfoFormChild.m */,
 				642B70401658959B00907FEA /* IC_SubjectInfoFormChild.xib */,
+				644E5B83175F006B002ABA52 /* IC_Notes.h */,
+				644E5B84175F006B002ABA52 /* IC_Notes.m */,
+				644E5B85175F006B002ABA52 /* IC_Notes.xib */,
+				64E2A3CB170A452B0007BDF2 /* IC_Experiment.h */,
+				64E2A3CC170A452B0007BDF2 /* IC_Experiment.m */,
+				64E2A3CD170A452B0007BDF2 /* IC_Experiment.xib */,
 				6463D064162F1AD4000A8D3B /* Supporting Files */,
 				645BB813164CCA0800BA3580 /* IC_OptionSelect.h */,
 				645BB814164CCA0800BA3580 /* IC_OptionSelect.m */,
@@ -483,6 +499,8 @@
 				64D692EA16631456004BA829 /* IC_MultiOptionSelect.xib in Resources */,
 				64D692ED16632214004BA829 /* checkmark.png in Resources */,
 				64D692EE16632217004BA829 /* emptymark.png in Resources */,
+				64E2A3CF170A452C0007BDF2 /* IC_Experiment.xib in Resources */,
+				644E5B87175F006B002ABA52 /* IC_Notes.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,6 +537,8 @@
 				642B703C1656F35B00907FEA /* SBJsonWriter.m in Sources */,
 				642B70411658959B00907FEA /* IC_SubjectInfoFormChild.m in Sources */,
 				64D692E916631456004BA829 /* IC_MultiOptionSelect.m in Sources */,
+				64E2A3CE170A452C0007BDF2 /* IC_Experiment.m in Sources */,
+				644E5B86175F006B002ABA52 /* IC_Notes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

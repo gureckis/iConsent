@@ -263,6 +263,57 @@ def participant_info_finished():
         return jsonify(status="error, no POST data")
 
 #----------------------------------------------
+# provides consent, officially.  uploads signature and updates database
+#----------------------------------------------
+@app.route('/SubscribeEmailList', methods=['POST'])
+def subscribe_email_list():
+    if request.method == 'POST':
+        if request.form.has_key('deviceID') and request.form.has_key('processID') and request.form.has_key('emailAddress'):
+            
+            deviceID = request.form['deviceID']
+            processID = request.form['processID']
+            emailAddress = request.form['emailAddress']
+            currentExperiment = request.form['currentExperiment']
+            currentLocation = request.form['currentLocation']
+            
+            print deviceID, processID, emailAddress
+            # set these up and insert into database - THIS DOESNT STOP DUPLICATES, BUT I THINK THATS OK
+            emailsubscriber = EmailListItem(emailAddress) 
+
+            exp = Experiment.query.filter_by(expname=currentExperiment).one()
+            if exp:
+                emailsubscriber.expid = exp.expid
+            else:
+                msg = "Error looking up experiment"
+                print msg
+                return jsonify(status="error", msg=msg)
+
+            loc = Location.query.filter_by(locname=currentLocation).one()
+            if loc:
+                emailsubscriber.locid = loc.locid
+            else:
+                msg = "Error looking up location"
+                print msg
+                return jsonify(status="error", msg=msg)
+
+
+            db_session.add(emailsubscriber)
+            db_session.commit()
+            msg = "everything seems to have gone ok"
+            print msg
+            return jsonify(status="success", msg=msg)
+
+        else:
+            msg = "didn't receive the device, processid, and/or email address"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
+
+
+#----------------------------------------------
 # load the consent form
 #----------------------------------------------
 @app.route('/consent', methods=['GET'])

@@ -35,12 +35,16 @@
 - (IBAction)showLangages:(id)sender;
 - (IBAction)showNumberOfChildren:(id)sender;
 - (IBAction)showBirthOrder:(id)sender;
-- (IBAction)goToGetACopy:(id)sender;
+- (IBAction)goToEmail:(id)sender;
+- (IBAction)goToNotesFromProvideEmail:(id)sender;
+- (IBAction)goToNotesFromHasEmail:(id)sender;
 - (NSString *)getArraySummary:(NSMutableArray *)array;
+- (IBAction)emailToggled:(id)sender;
 @end
 
 @implementation IC_SubjectInfoFormChild
 @synthesize model = _model;
+@synthesize mainSubview = _mainSubview;
 @synthesize firstName = _firstName;
 @synthesize lastName = _lastName;
 @synthesize gender = _gender;
@@ -61,6 +65,16 @@
 @synthesize primaryLanguagePopoverController = _primaryLanguagePopoverController;
 @synthesize numChildrenPopoverController = _numChildrenPopoverController;
 @synthesize birthOrderPopoverController = _birthOrderPopoverController;
+
+@synthesize followupHasEmailSubview = _followupHasEmailSubview;
+@synthesize yesNoFollowupSwitch = _yesNoFollowupSwitch;
+@synthesize followupHasEmailNextButton = _followupHasEmailNextButton;
+
+@synthesize followupProvideEmailSubview = _followupProvideEmailSubview;
+@synthesize emailAddress = _emailAddress;
+@synthesize followupProvideEmailNextButton = _followupProvideEmailNextButton;
+
+@synthesize sendEmail = _sendEmail;
 
 - (IBAction)goToLastName:(id)sender{
     [self.lastName becomeFirstResponder];
@@ -88,31 +102,50 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    NSUInteger resizeMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+
     // Do any additional setup after loading the view from its nib.
     // set up model
     IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     self.model = appDelegate.model;
     self.model.delegate = self;
     
-    // load options from the server
-    /*
-    if ([self.model loadServerInfo]) {
-        NSLog(@"couldn't load server");
-        // make reservation on server
-        //[self.model makeAReservation];
-    }
-    */
-    
     self.experiment_location.adjustsFontSizeToFitWidth = YES;
     self.orgname.adjustsFontSizeToFitWidth = YES;
     self.subjectnumber.adjustsFontSizeToFitWidth = YES;
     
-    // check for internet connection
     self.subjectnumber.text = self.model.subjectID;
     self.orgname.text = self.model.organizationName;
     self.experiment_location.text = [[NSString alloc] initWithFormat:@"%@ (%@)", self.model.currentExperiment, self.model.currentLocation];
 
-    
+
+    self.mainSubview.autoresizesSubviews = YES;
+    self.mainSubview.autoresizingMask = resizeMask;
+    [self.view addSubview:self.mainSubview];
+    self.mainSubview.frame = CGRectMake(0, 0, 768, 1000);
+
+    self.followupHasEmailSubview.autoresizesSubviews = YES;
+    self.followupHasEmailSubview.autoresizingMask = resizeMask;
+    [self.view addSubview:self.followupHasEmailSubview];
+    self.followupHasEmailSubview.frame = CGRectMake(1024+625, 300, 625, 450);
+
+
+    self.followupProvideEmailSubview.autoresizesSubviews = YES;
+    self.followupProvideEmailSubview.autoresizingMask = resizeMask;
+    [self.view addSubview:self.followupProvideEmailSubview];
+    self.followupProvideEmailSubview.frame = CGRectMake(1024+625, 300, 625, 450);
+
+    /*
+    [self.view addSubview:self.followupSubview];
+    self.followupSubview.frame = CGRectMake(1024+625, 300, 625, 450);
+    */
+    self.yesNoFollowupSwitch.onText = @"YES";
+    self.yesNoFollowupSwitch.offText = @"NO";
+    [self.yesNoFollowupSwitch addTarget:self action:@selector(emailToggled:) forControlEvents:UIControlEventValueChanged];
+    self.yesNoFollowupSwitch.on = NO;
+    self.sendEmail = NO;
+
     NSLog(@"view did load");
     self.firstName.adjustsFontSizeToFitWidth = YES;
     self.lastName.adjustsFontSizeToFitWidth = YES;
@@ -129,10 +162,19 @@
     
     self.selectedEthnicities = [[NSMutableArray alloc] init];
     self.selectedLanguages = [[NSMutableArray alloc] init];
+
 }
 
-- (void)didReceiveMemoryWarning
-{
+- (IBAction)emailToggled:(id)sender {
+    NSLog(@"email toggled!!!");
+    if (self.yesNoFollowupSwitch.on == YES) {
+        self.sendEmail = YES;
+    } else {
+        self.sendEmail = NO;
+    }
+}
+
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
@@ -295,16 +337,6 @@
     return jsonSummary;
 }
 
-- (IBAction)goToGetACopy:(id)sender {
-    // first check if all the fields are ok.
-    NSString *jsonSummary = [self computeJSONSummary];
-    if ([self.model submitParticipantInfo:jsonSummary]) {
-        // return to control to main controller
-        IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-        [appDelegate.viewController getParticipantInfoIsFinished];
-    }
-}
-
 - (NSString *)getArraySummary:(NSMutableArray *)array {
     NSMutableString *shortVersion = [[NSMutableString alloc] init];
     if ([array count]==0) {
@@ -395,6 +427,84 @@
         [self.birthOrderPopoverController dismissPopoverAnimated: YES];
     }
     // dismiss popover
+}
+
+- (IBAction)goToEmail:(id)sender {
+    // first check if all the fields are ok.
+    NSString *jsonSummary = [self computeJSONSummary];
+    if ([self.model submitParticipantInfo:jsonSummary]) {
+        NSLog(@"%@",self.model.emailAddress);
+        if (self.model.emailAddress == nil) {
+            NSLog(@"no email!");
+            self.mainSubview.alpha = 0.2;
+            self.followupProvideEmailSubview.alpha = 1.0;
+            // if you provided email then show one form
+            [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
+                self.followupProvideEmailSubview.frame = CGRectMake(81, 300, 625, 450);
+            } completion:^(BOOL finished) {
+                [self.view setUserInteractionEnabled:YES];
+            }];
+        } else {  // otherwise
+            NSLog(@"yes email!");
+            self.mainSubview.alpha = 0.2;
+            self.followupHasEmailSubview.alpha = 1.0;
+            // if you provided email then show one form
+            [UIView animateWithDuration:0.5f delay:0.0f options:UIViewAnimationCurveEaseIn animations:^{
+                self.followupHasEmailSubview.frame = CGRectMake(81, 300, 625, 450);
+            } completion:^(BOOL finished) {
+                [self.view setUserInteractionEnabled:YES];
+                self.yesNoFollowupSwitch.on = NO;
+                self.yesNoFollowupSwitch.on = YES;
+
+            }];
+        }
+    }
+}
+
+
+
+- (IBAction)goToNotesFromProvideEmail:(id)sender {
+    // if email is nil or person said "no", then go to experiment
+    // [self.model isValidEmail:self.emailAddress.text]
+    
+    if(self.emailAddress.text == nil || [self.emailAddress.text isEqualToString: @""] || [self.emailAddress.text isEqualToString: @"*********************"])  {
+        IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        [appDelegate.viewController getParticipantInfoIsFinished];
+    } else {
+        self.model.emailAddress = self.emailAddress.text;
+        if ([self.model isValidEmail:self.model.emailAddress]) {
+            // submit to server, then go to notes screen
+            // first check if all the fields are ok.
+            if ([self.model subscribeEmailList:self.model.emailAddress]) {  
+                // return to control to main controller
+                IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+                [appDelegate.viewController getParticipantInfoIsFinished];
+            }
+        }
+    }
+    
+}
+
+
+- (IBAction)goToNotesFromHasEmail:(id)sender {
+    // if email is nil or person said "no", then go to experiment
+    // [self.model isValidEmail:self.emailAddress.text]
+    
+    if (self.yesNoFollowupSwitch.on == NO) {
+        IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        [appDelegate.viewController getParticipantInfoIsFinished];
+    } else {
+        if ([self.model isValidEmail:self.model.emailAddress]) {
+            // submit to server, then go to notes screen
+            // first check if all the fields are ok.
+            if ([self.model subscribeEmailList:self.model.emailAddress]) { 
+                // return to control to main controller
+                IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+                [appDelegate.viewController getParticipantInfoIsFinished];
+            }
+        }
+    }
+    
 }
 
 
