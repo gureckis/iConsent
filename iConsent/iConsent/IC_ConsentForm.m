@@ -12,7 +12,6 @@
 @property (strong, nonatomic) UIImage *signatureImage;
 @property BOOL signedComplete;
 -(void)loadConsent;
-- (BOOL)isValidEmail:(NSString *)email;
 - (void)emailConsent;
 @end
 
@@ -196,6 +195,7 @@
     [self setSignatureLabel:nil];
     [self setClearButton:nil];
     [self setNextButton:nil];
+    [self setYesNoSwitch:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -231,14 +231,7 @@
     
 }
 
-- (BOOL)isValidEmail:(NSString *)email {
-    BOOL stricterFilter = YES; // Discussion http://blog.logichigh.com/2010/09/02/validating-an-e-mail-address/
-    NSString *stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
-    NSString *laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
-    NSString *emailRegex = stricterFilter ? stricterFilterString : laxString;
-    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
-    return [emailTest evaluateWithObject:email];
-}
+
 
 - (void)emailConsent {
     if ([MFMailComposeViewController canSendMail])
@@ -261,10 +254,10 @@
     else
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failure"
-                                                        message:@"Your device doesn't support email!"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
+                                            message:@"Your device doesn't support email!"
+                                            delegate:nil
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:nil];
         [alert show];
     }
     // email data here
@@ -283,7 +276,7 @@
         IC_AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
         [appDelegate.viewController getConsentIsFinished];
     } else {
-        if([self isValidEmail:self.emailAddress.text]) {
+        if([self.model isValidEmail:self.emailAddress.text]) {
             NSLog(@"got a valid email");
             self.model.emailAddress = self.emailAddress.text;
             [self emailConsent];
@@ -348,6 +341,9 @@
     {
         case MFMailComposeResultCancelled:
             NSLog(@"Mail cancelled: you cancelled the operation and no email message was queued.");
+            // empty email field
+            [self.emailAddress setText:nil];
+            self.model.emailAddress = nil;
             break;
         case MFMailComposeResultSaved:
             NSLog(@"Mail saved: you saved the email message in the drafts folder.");
