@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSURLConnection.h>
 
-#define SERVERNAME "http://0.0.0.0:5003"
+#define SERVERNAME "http://127.0.0.1:5003"
 
 #define IC_MODEL_SUCCESS TRUE
 #define IC_MODEL_FAILURE FALSE
@@ -69,5 +69,7 @@
 - (void)selectLocation:(id)optionPicked;
 - (BOOL)studyFormFinished;
 - (BOOL)submitParticipantInfo:(NSString *)jsonSummary;
+- (BOOL)subscribeEmailList:(NSString *)jsonSummary;
 - (BOOL)connected;
+- (BOOL)isValidEmail:(NSString *)email;
 @end

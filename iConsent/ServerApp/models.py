@@ -8,6 +8,7 @@ from config import config
 PARTICIPANT_TABLENAME = config.get('Database Parameters', 'participant_table_name')
 LOCATION_TABLENAME = config.get('Database Parameters', 'location_table_name')
 EXPERIMENT_TABLENAME = config.get('Database Parameters', 'experiment_table_name')
+EMAIL_TABLENAME = config.get('Database Parameters', 'emaillist_table_name')
 
 # possible statuses for a participant in the database
 RESERVED = 0
@@ -75,6 +76,19 @@ class Participant(Base):
     def __repr__(self):
         return '<Participant %r,%r, %r>' % (self.status, self.processid, self.status)
 
+class EmailListItem(Base):
+    __tablename__ = EMAIL_TABLENAME
+    emailid = Column(Integer, primary_key=True)
+    emailaddress = Column(String(128))
+    expid = Column(Integer, ForeignKey('experiments.expid'))
+    locid = Column(Integer, ForeignKey('locations.locid'))
+    exp = relationship('Experiment', lazy='joined', uselist=False, primaryjoin=expid==Experiment.expid)
+    loc = relationship('Location', lazy='joined', uselist=False, primaryjoin=locid==Location.locid)
+    active = Column(Boolean)
+    
+    def __init__(self, email):
+        self.emailaddress = email
+        self.active = True
 
 # how to serialize (i.e., JSONify) an obect
 #    def serialize(self, owned, pricethreshold):
