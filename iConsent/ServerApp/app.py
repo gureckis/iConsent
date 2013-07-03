@@ -263,6 +263,43 @@ def participant_info_finished():
         return jsonify(status="error, no POST data")
 
 #----------------------------------------------
+# updates experimenter notes
+#----------------------------------------------
+@app.route('/UpdateNotes', methods=['POST'])
+def update_notes():
+    if request.method == 'POST':
+        if request.form.has_key('deviceID') and request.form.has_key('processID') and request.form.has_key('notesInfo'):
+            
+            deviceID = request.form['deviceID']
+            processID = request.form['processID']
+            notesInfoJSON = request.form['notesInfo']
+            
+            print deviceID, processID
+            # see if this pair already exists
+            person = Participant.query.filter_by(deviceid=deviceID).filter_by(processid=processID).one()
+            if person:
+                person.notes = notesInfoJSON
+                person.status = SURVEYCOMPLETE
+                db_session.commit()
+                msg = "everything seems to have gone ok"
+                print msg
+                return jsonify(status="success", msg=msg)
+            else:
+                # this already exists.  something weird is happening
+                msg = "device/process appears to not exists"
+                print msg
+                db_session.commit()
+                return jsonify(status="error", msg=msg)
+        else:
+            msg = "didn't receive the device and processid"
+            print msg
+            return jsonify(status="error", msg = msg)
+    else:
+        msg = "didn't get a POST"
+        print msg
+        return jsonify(status="error, no POST data")
+
+#----------------------------------------------
 # provides consent, officially.  uploads signature and updates database
 #----------------------------------------------
 @app.route('/SubscribeEmailList', methods=['POST'])

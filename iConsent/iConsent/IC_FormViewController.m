@@ -33,9 +33,16 @@
         case PARTICIPANT_INFO:
             [self getParticipantInfo];
             break;
+        case DO_NOTES:
+            [self doNotes];
+            break;
         case DO_EXPERIMENT:
             [self doExperiment];
             break;
+        case DO_FINAL_NOTES:
+            [self doFinalNotes];
+            break;
+
         case THANK_YOU:
             [self getThankYou];
             break;
@@ -91,16 +98,55 @@
 
 - (void)getParticipantInfoIsFinished {
     NSLog(@"done with participant info");
+    self.state = DO_NOTES;
+    [self updateState];
+}
+
+- (void)doNotes {
+    // first set allowable orientations
+    self.orientations = UIInterfaceOrientationPortrait;
+    
+    IC_Notes *vs = [[IC_Notes alloc] initWithNibName:@"IC_Notes" bundle:nil];
+    [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+}
+
+- (void)doNotesIsFinished {
+    // this should "end" this sequence of views
     self.state = DO_EXPERIMENT;
     [self updateState];
 }
 
+
 - (void)doExperiment {
+    // first set allowable orientations
+    self.orientations = UIInterfaceOrientationPortrait;
     
+    IC_Experiment *vs = [[IC_Experiment alloc] initWithNibName:@"IC_Experiment" bundle:nil];
+    [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];    
 }
 
 - (void)doExperimentIsFinished {
+    // first set allowable orientations
+    self.orientations = UIInterfaceOrientationPortrait;
+    
+    IC_Notes *vs = [[IC_Notes alloc] initWithNibName:@"IC_Notes" bundle:nil];
+    [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+}
+
+
+
+- (void)doFinalNotes {
+    // first set allowable orientations
+    self.orientations = UIInterfaceOrientationPortrait;
+    
+    IC_Notes *vs = [[IC_Notes alloc] initWithNibName:@"IC_Notes" bundle:nil];
+    [self transitionToViewController:vs withOptions:UIViewAnimationOptionTransitionFlipFromRight];
+}
+
+- (void)doFinalNotesIsFinished {
     // this should "end" this sequence of views
+    self.state = THANK_YOU;
+    [self updateState];
 }
 
 - (void)getThankYou {

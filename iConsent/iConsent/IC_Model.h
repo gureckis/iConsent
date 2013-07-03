@@ -51,6 +51,8 @@
 @property (nonatomic, strong) NSString *currentExperiment;
 @property (nonatomic, strong) NSString *currentLocation;
 @property (nonatomic, strong) NSString *emailAddress;
+@property (nonatomic, strong) NSString *participantInfo;
+@property (nonatomic, strong) NSString *notesText;
 @property BOOL childStudy;
 @property BOOL consent;
 
@@ -69,6 +71,7 @@
 - (void)selectLocation:(id)optionPicked;
 - (BOOL)studyFormFinished;
 - (BOOL)submitParticipantInfo:(NSString *)jsonSummary;
+- (BOOL)updateNotes:(NSString *)jsonSummary;
 - (BOOL)subscribeEmailList:(NSString *)jsonSummary;
 - (BOOL)connected;
 - (BOOL)isValidEmail:(NSString *)email;

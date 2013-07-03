@@ -14,10 +14,11 @@ EMAIL_TABLENAME = config.get('Database Parameters', 'emaillist_table_name')
 RESERVED = 0
 CONSENTED = 1
 INFORECVD = 2
-STARTED = 3
-COMPLETED = 4
-DEBRIEFED = 5
-QUITEARLY = 6
+SURVEYCOMPLETE = 3
+STARTED = 4
+COMPLETED = 5
+DEBRIEFED = 6
+QUITEARLY = 7
 
 ###########################################################
 # the model
@@ -65,6 +66,7 @@ class Participant(Base):
     gender = Column(String(1))
     name = Column(String(256))
     participantinfo = Column(Text)
+    notes = Column(Text)
     
     def __init__(self, ipaddress, deviceid, processid):
         self.ipaddress = ipaddress

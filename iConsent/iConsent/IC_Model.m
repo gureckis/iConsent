@@ -50,6 +50,8 @@
 @synthesize delegate = _delegate;
 @synthesize interfaceDelegate = _interfaceDelegate;
 @synthesize emailAddress = _emailAddress;
+@synthesize participantInfo = _participantInfo;
+@synthesize notesText = _notesText;
 
 - (id)init {
     self = [super init];
@@ -226,6 +228,7 @@
 
 - (BOOL)submitParticipantInfo:(NSString *)jsonSummary {
     // there might be a couple actual database field we want to deal with here
+    self.participantInfo = jsonSummary;
     if([self connected]) {
         NSString *url = [[NSString alloc] initWithFormat:@"%@/ParticipantInfoFinished", @SERVERNAME];
         NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
@@ -246,9 +249,33 @@
     
 }
 
+- (BOOL)updateNotes:(NSString *)jsonSummary {
+    // there might be a couple actual database field we want to deal with here
+    self.notesText = jsonSummary;
+    if([self connected]) {
+        NSString *url = [[NSString alloc] initWithFormat:@"%@/UpdateNotes", @SERVERNAME];
+        NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   self.deviceID, @"deviceID",
+                                   self.processID,@"processID",
+                                   jsonSummary, @"notesInfo",
+                                   nil];
+        NSMutableURLRequest *request = [self makePOSTRequestWithURL:url andKeys:keyValues];
+        self.sendConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+        NSAssert(self.sendConnection != nil, @"Failure to create URL connection.");
+        // show in the status bar that network activity is starting
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    } else {
+        [self internetUnreachable];
+        return IC_MODEL_FAILURE;
+    }
+    return IC_MODEL_SUCCESS;
+    
+}
+
 - (BOOL)subscribeEmailList:(NSString *)emailAddress {
 
     // there might be a couple actual database field we want to deal with here
+    self.emailAddress = emailAddress;
     if([self connected]) {
         NSString *url = [[NSString alloc] initWithFormat:@"%@/SubscribeEmailList", @SERVERNAME];
         NSDictionary *keyValues = [[NSDictionary alloc] initWithObjectsAndKeys:

@@ -13,6 +13,8 @@
 #import "IC_StudyInfoForm.h"
 #import "IC_ConsentForm.h"
 #import "IC_SubjectInfoFormChild.h"
+#import "IC_Experiment.h"
+#import "IC_Notes.h"
 
 @interface IC_FormViewController : UIViewController <IC_ModelInterfaceDelegate, UIAlertViewDelegate>
 @property (nonatomic, strong) UIView *containerView;
@@ -40,13 +42,23 @@
 - (void)getParticipantInfo;
 - (void)getParticipantInfoIsFinished;
 
+// do notes
+#define DO_NOTES 3
+- (void)doNotes;
+- (void)doNotesIsFinished;
+
 // do experiment
-#define DO_EXPERIMENT 3
+#define DO_EXPERIMENT 4
 - (void)doExperiment;
 - (void)doExperimentIsFinished;
 
+// do final notes
+#define DO_FINAL_NOTES 5
+- (void)doFinalNotes;
+- (void)doFinalNotesIsFinished;
+
 // thank you
-#define THANK_YOU 4
+#define THANK_YOU 6
 - (void)getThankYou;
 - (void)getThankYouIsFinished;
 
