@@ -61,6 +61,7 @@
 		6463D074162F1AD4000A8D3B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6463D073162F1AD4000A8D3B /* Default-568h@2x.png */; };
 		6463D077162F1AD4000A8D3B /* IC_FormViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6463D076162F1AD4000A8D3B /* IC_FormViewController.m */; };
 		6463D07A162F1AD4000A8D3B /* IC_FormViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6463D078162F1AD4000A8D3B /* IC_FormViewController.xib */; };
+		647FD741179735910022034C /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 647FD740179735910022034C /* logo.png */; };
 		64B83C1B1640A9E2002993BF /* IC_Model.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B83C1A1640A9E2002993BF /* IC_Model.m */; };
 		64BBDD3A1630964500CFF691 /* placeholder.txt in Resources */ = {isa = PBXBuildFile; fileRef = 64BBDD391630964500CFF691 /* placeholder.txt */; };
 		64D692E916631456004BA829 /* IC_MultiOptionSelect.m in Sources */ = {isa = PBXBuildFile; fileRef = 64D692E716631456004BA829 /* IC_MultiOptionSelect.m */; };
@@ -158,6 +159,7 @@
 		6463D075162F1AD4000A8D3B /* IC_FormViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IC_FormViewController.h; sourceTree = "<group>"; };
 		6463D076162F1AD4000A8D3B /* IC_FormViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IC_FormViewController.m; sourceTree = "<group>"; };
 		6463D079162F1AD4000A8D3B /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/IC_FormViewController.xib; sourceTree = "<group>"; };
+		647FD740179735910022034C /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		64B83C191640A9E2002993BF /* IC_Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IC_Model.h; sourceTree = "<group>"; };
 		64B83C1A1640A9E2002993BF /* IC_Model.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IC_Model.m; sourceTree = "<group>"; };
 		64BBDD29163095F100CFF691 /* app.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = app.py; sourceTree = "<group>"; };
@@ -409,6 +411,7 @@
 		64BBDD35163095F100CFF691 /* static */ = {
 			isa = PBXGroup;
 			children = (
+				647FD740179735910022034C /* logo.png */,
 			);
 			path = static;
 			sourceTree = "<group>";
@@ -501,6 +504,7 @@
 				64D692EE16632217004BA829 /* emptymark.png in Resources */,
 				64E2A3CF170A452C0007BDF2 /* IC_Experiment.xib in Resources */,
 				644E5B87175F006B002ABA52 /* IC_Notes.xib in Resources */,
+				647FD741179735910022034C /* logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

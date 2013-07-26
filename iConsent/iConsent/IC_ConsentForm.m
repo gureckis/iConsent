@@ -238,7 +238,7 @@
     {
         MFMailComposeViewController *mailer = [[MFMailComposeViewController alloc] init];
         mailer.mailComposeDelegate = self;
-        NSString *subject = [[NSString alloc] initWithFormat:@"[%@]: Informed consent from experiment today at %@", [self.model getOrganizationName], [self.model getCurrentLocation], nil];
+        NSString *subject = [[NSString alloc] initWithFormat:@"[%@]: Informed consent from study today at %@", [self.model getOrganizationName], [self.model getCurrentLocation], nil];
         [mailer setSubject:subject];
         
         NSArray *toRecipients = [NSArray arrayWithObjects:self.model.emailAddress, nil];
